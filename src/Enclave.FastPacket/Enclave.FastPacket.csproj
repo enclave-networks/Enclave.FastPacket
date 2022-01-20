@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>Enclave.FastPacket</PackageId>
+    <Version>1.0.0</Version>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/enclave-networks/Enclave.FastPacket</RepositoryUrl>
+    <Authors>Enclave Networks</Authors>
+    <Company>Enclave Networks</Company>
+  </PropertyGroup>
+
+
+    <ItemGroup>
+        <ProjectReference Include="../Enclave.FastPacket.Generator/Enclave.FastPacket.Generator.csproj"
+                          OutputItemType="Analyzer"
+                          PrivateAssets="all"
+                          ReferenceOutputAssembly="false">
+        </ProjectReference>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,152 @@
+# To learn more about .editorconfig see https://aka.ms/editorconfigdocs
+
+# All files
+[*]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+; Force VS to recommend underscore at the start of created private fields.
+[*.cs]
+dotnet_naming_rule.private_members_with_underscore.symbols  = private_fields
+dotnet_naming_rule.private_members_with_underscore.style    = prefix_underscore
+dotnet_naming_rule.private_members_with_underscore.severity = suggestion
+
+dotnet_naming_symbols.private_fields.applicable_kinds           = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_style.prefix_underscore.capitalization = camel_case
+dotnet_naming_style.prefix_underscore.required_prefix = _
+
+# name all constant fields using UpperCase
+dotnet_naming_rule.constant_fields_should_be_upper_case.severity = warning
+dotnet_naming_rule.constant_fields_should_be_upper_case.symbols  = constant_fields
+dotnet_naming_rule.constant_fields_should_be_upper_case.style    = upper_case_style
+
+dotnet_naming_symbols.constant_fields.applicable_kinds   = field
+dotnet_naming_symbols.constant_fields.required_modifiers = const
+dotnet_naming_style.upper_case_style.capitalization = pascal_case
+
+; Avoid this. unless absolutely necessary
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+
+# IDE0024: Use block body for operators
+csharp_style_expression_bodied_operators = when_on_single_line
+
+# CA1031: Do not catch general exception types
+dotnet_diagnostic.CA1031.severity = none
+
+# CA2007: Consider calling ConfigureAwait on the awaited task
+dotnet_diagnostic.CA2007.severity = silent
+
+# CA1003: Use generic event handler instances
+dotnet_diagnostic.CA1003.severity = suggestion
+
+# CA1056: URI-like properties should not be strings
+dotnet_diagnostic.CA1056.severity = suggestion
+
+# CA1819: Properties should not return arrays
+dotnet_diagnostic.CA1819.severity = suggestion
+
+# CA1724: Type names should not match namespaces
+dotnet_diagnostic.CA1724.severity = suggestion
+
+# CA1030: Use events where appropriate
+dotnet_diagnostic.CA1030.severity = silent
+
+# CA1002: Do not expose generic lists
+dotnet_diagnostic.CA1002.severity = suggestion
+
+# CA2227: Collection properties should be read only
+dotnet_diagnostic.CA2227.severity = suggestion
+
+# CA1014: Mark assemblies with CLSCompliant
+dotnet_diagnostic.CA1014.severity = none
+
+# CA1711: Identifiers should not have incorrect suffix
+dotnet_diagnostic.CA1711.severity = suggestion
+
+# CA1028: Enum Storage should be Int32
+dotnet_diagnostic.CA1028.severity = none
+
+# CA1826: Don't apply to ordefault methods
+dotnet_code_quality.CA1826.exclude_ordefault_methods = true
+
+# CA1308: Normalize strings to uppercase
+dotnet_diagnostic.CA1308.severity = none
+
+# CA1032: Implement standard exception constructors
+dotnet_diagnostic.CA1032.severity = none
+
+# C0162 exclude extension methods from needing null contract assertions
+dotnet_code_quality.CA1062.exclude_extension_method_this_parameter = true
+
+# CA2225: Operator overloads have named alternates
+dotnet_diagnostic.CA2225.severity = none
+
+# CA2229: Implement serialization constructors
+dotnet_diagnostic.CA2229.severity = none
+
+# CA1508: Avoid dead conditional code - Too many false positives for this to be useful.
+dotnet_diagnostic.CA1508.severity = none
+
+# SA1309: Field names should not begin with underscore
+dotnet_diagnostic.SA1309.severity = none
+
+# SA1101: Prefix local calls with this
+dotnet_diagnostic.SA1101.severity = none
+
+# SA1600: Elements should be documented
+dotnet_diagnostic.SA1600.severity = none
+
+# SA1623: Property summary documentation should match accessors
+dotnet_diagnostic.SA1623.severity = none
+
+# SA1200: Using directives should be placed correctly
+dotnet_diagnostic.SA1200.severity = none
+
+# SA1633: File should have header
+dotnet_diagnostic.SA1633.severity = none
+
+# SA1116: Split parameters should start on line after declaration
+dotnet_diagnostic.SA1116.severity = none
+
+# CA1303: Do not pass literals as localized parameters
+dotnet_diagnostic.CA1303.severity = none
+
+# SA1204: Static elements should appear before instance elements
+dotnet_diagnostic.SA1204.severity = none
+
+# CA1721: Property names should not match get methods
+dotnet_diagnostic.CA1721.severity = suggestion
+
+# CA1720: Identifier contains type name
+dotnet_diagnostic.CA1720.severity = none
+
+# SA1602: Enumeration items should be documented
+dotnet_diagnostic.SA1602.severity = suggestion
+
+# SA1642: Constructor summary documentation should begin with standard text
+dotnet_diagnostic.SA1642.severity = none
+
+# SA1611: Element parameters should be documented
+dotnet_diagnostic.SA1611.severity = none
+
+# SA1615: Element return value should be documented
+dotnet_diagnostic.SA1615.severity = none
+
+# SA1201: Elements should appear in the correct order
+dotnet_diagnostic.SA1201.severity = none
+
+# CA1054: URI-like parameters should not be strings
+dotnet_diagnostic.CA1054.severity = none
+
+# SA1515: Single-line comment should be preceded by blank line
+dotnet_diagnostic.SA1515.severity = none
+
+# CA1716: Identifiers should not match keywords
+dotnet_diagnostic.CA1716.severity = none
+csharp_style_namespace_declarations=file_scoped:warning

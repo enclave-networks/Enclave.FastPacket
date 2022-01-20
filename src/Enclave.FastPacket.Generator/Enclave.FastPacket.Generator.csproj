@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Version>1.0.0</Version>
+		<LangVersion>9.0</LangVersion>
+		<!-- Generates a package at build -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<!-- Do not include the generator as a lib dependency -->
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<Authors>Alistair Evans</Authors>
+		<Description>Generate strongly-typed identifiers for your entity IDs, using a source generator.</Description>
+		<Copyright>Alistair Evans 2021</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/alistairjevans/TypedIds</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/alistairjevans/TypedIds</RepositoryUrl>
+		<RepositoryType>GitHub</RepositoryType>
+		<PackageTags>generator</PackageTags>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+        <Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- Package the generator in the analyzer directory of the nuget package -->
+		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.0.1" />
+		<PackageReference Include="Scriban" Version="5.0.0" PrivateAssets="all" GeneratePathProperty="true" />
+
+        <!-- Package the Scriban dependency alongside the generator assembly -->
+        <None Include="$(PkgScriban)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+	</ItemGroup>
+
+    <ItemGroup>
+        <!--<Compile Remove="FileTemplates/*" />-->
+        <EmbeddedResource Include="FileTemplates/*" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!--<Compile Remove="ExpressionTemplates/*" />-->
+        <EmbeddedResource Include="ExpressionTemplates/*" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="FileTemplates\ReadOnlyRefStruct.cs" />
+      <Compile Remove="FileTemplates\WriteableRefStruct.cs" />
+    </ItemGroup>
+
+</Project>
