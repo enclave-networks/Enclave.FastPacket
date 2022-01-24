@@ -275,9 +275,9 @@ namespace Enclave.FastPacket.Generator
                 positionProvider = new AutomaticPositionProvider(previousProperty);
             }
 
-            if (options.SizeFunction is string && TryGetSizeMethod(definitionType, options.SizeFunction, configurationLocation, out var sizeMethod))
+            if (options.SizeFunction is string && TryGetSizeMethodProvider(definitionType, options.SizeFunction, configurationLocation, out var funcSizeProvider))
             {
-                sizeProvider = new FunctionSizeProvider(sizeMethod!);
+                sizeProvider = funcSizeProvider;
             }
             else if (options.Size.HasValue)
             {
@@ -546,11 +546,11 @@ namespace Enclave.FastPacket.Generator
             return true;
         }
 
-        private bool TryGetSizeMethod(INamedTypeSymbol containingType, string declaredName, Location? diagnosticLocation, out IMethodSymbol? positionMethod)
+        private bool TryGetSizeMethodProvider(INamedTypeSymbol containingType, string declaredName, Location? diagnosticLocation, out ISizeProvider? sizeProvider)
         {
             var foundMembers = containingType.GetMembers(declaredName);
             DiagnosticDescriptor? diagnosticMessage = Diagnostics.SizeFunctionIsNotFound;
-            positionMethod = null;
+            sizeProvider = null;
 
             foreach (var member in foundMembers)
             {
@@ -564,13 +564,16 @@ namespace Enclave.FastPacket.Generator
 
                     diagnosticMessage = Diagnostics.SizeFunctionUnexpectedSignature;
 
-                    if (MethodParametersMatch(methodSymbol, ReadOnlySpanByteType, _ctxt.Compilation.GetSpecialType(SpecialType.System_Int32)) &&
+                    // Size methods can optionally take the position of the field as an int if they need to, but it's optional.
+                    // Not much point computing and passing that position if it's not required.
+                    if ((MethodParametersMatch(methodSymbol, ReadOnlySpanByteType, _ctxt.Compilation.GetSpecialType(SpecialType.System_Int32)) ||
+                        MethodParametersMatch(methodSymbol, ReadOnlySpanByteType)) &&
                         MethodReturnTypeMatches(methodSymbol, _ctxt.Compilation.GetSpecialType(SpecialType.System_Int32)))
                     {
                         // Looks good. Choose this one.
                         // No errors.
                         diagnosticMessage = null;
-                        positionMethod = methodSymbol;
+                        sizeProvider = new FunctionSizeProvider(methodSymbol);
                     }
                 }
             }
@@ -607,7 +610,7 @@ namespace Enclave.FastPacket.Generator
             return true;
         }
 
-        private bool MethodReturnTypeMatches(IMethodSymbol method, INamedTypeSymbol returnType)
+        private static bool MethodReturnTypeMatches(IMethodSymbol method, INamedTypeSymbol returnType)
         {
             if (method.ReturnsVoid)
             {

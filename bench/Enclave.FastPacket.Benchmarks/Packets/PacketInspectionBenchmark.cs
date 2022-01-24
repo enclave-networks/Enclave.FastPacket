@@ -72,7 +72,7 @@ public class PacketInspectionBenchmark
 
         if (ethernetPacket.Type == EthernetType.IPv4)
         {
-            var ipPacket = new Ipv4PacketSpan(ethernetPacket.Payload);
+            var ipPacket = new Ipv4(ethernetPacket.Payload);
 
             if (ipPacket.Protocol == System.Net.Sockets.ProtocolType.Udp)
             {
@@ -127,7 +127,7 @@ public class PacketInspectionBenchmark
 
         if (ethernetPacket.Type == EthernetType.IPv4)
         {
-            var ipPacket = new Ipv4PacketSpan(ethernetPacket.Payload);
+            var ipPacket = new Ipv4(ethernetPacket.Payload);
 
             if (ipPacket.Protocol == System.Net.Sockets.ProtocolType.Udp)
             {

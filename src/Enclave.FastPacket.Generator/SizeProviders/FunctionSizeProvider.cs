@@ -1,7 +1,7 @@
 ﻿using Enclave.FastPacket.Generator.ValueProviders;
 using Microsoft.CodeAnalysis;
 
-namespace Enclave.FastPacket.Generator.PositionProviders
+namespace Enclave.FastPacket.Generator.SizeProviders
 {
     internal class FunctionSizeProvider : ISizeProvider
     {
@@ -17,7 +17,14 @@ namespace Enclave.FastPacket.Generator.PositionProviders
 
         public string GetSizeExpression(string spanName, string positionExpression)
         {
-            return $"{FullReferenceName}({spanName}, {positionExpression})";
+            if (Method.Parameters.Length > 1)
+            {
+                return $"{FullReferenceName}({spanName}, {positionExpression})";
+            }
+            else
+            {
+                return $"{FullReferenceName}({spanName})";
+            }
         }
     }
 }

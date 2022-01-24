@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,18 +17,27 @@ namespace Enclave.FastPacket.Generator
 
         public PacketParserGenerator()
         {
-            //AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
-            //{
-            //    if (e.Name.StartsWith("Scriban", StringComparison.InvariantCulture))
-            //    {
-            //        return Assembly.LoadFile(
-            //            Path.Combine(
-            //                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            //                @".nuget\packages\scriban\5.0.0\lib\netstandard2.0\Scriban.dll"));
-            //    }
+            // Figure out how to remove this when packing in 1.0.
+            AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
+            {
+                if (e.Name.StartsWith("Scriban", StringComparison.InvariantCulture))
+                {
+                    try
+                    {
+                        return Assembly.LoadFile(
+                            Path.Combine(
+                                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                                @".nuget\packages\scriban\5.0.0\lib\netstandard2.0\Scriban.dll"));
+                    }
+                    catch
+                    {
+                        // Best not to propagate an exception out of the resolver.
+                        return null;
+                    }
+                }
 
-            //    return null;
-            //};
+                return null;
+            };
         }
 
         public void Execute(GeneratorExecutionContext context)

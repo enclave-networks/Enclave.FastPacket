@@ -18,7 +18,7 @@ public class RealPacketTests
 
         Assert.AreEqual(EthernetType.IPv4, ethPacket.Type);
 
-        var ipSpan = new Ipv4PacketSpan(ethPacket.Payload);
+        var ipSpan = new Ipv4(ethPacket.Payload);
 
         Assert.AreEqual("100.73.154.85", ipSpan.Source.ToString());
         Assert.AreEqual("100.83.102.174", ipSpan.Destination.ToString());
