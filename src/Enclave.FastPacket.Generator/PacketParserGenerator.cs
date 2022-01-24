@@ -18,18 +18,18 @@ namespace Enclave.FastPacket.Generator
 
         public PacketParserGenerator()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
-            {
-                if (e.Name.StartsWith("Scriban", StringComparison.InvariantCulture))
-                {
-                    return Assembly.LoadFile(
-                        Path.Combine(
-                            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                            @".nuget\packages\scriban\5.0.0\lib\netstandard2.0\Scriban.dll"));
-                }
+            //AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
+            //{
+            //    if (e.Name.StartsWith("Scriban", StringComparison.InvariantCulture))
+            //    {
+            //        return Assembly.LoadFile(
+            //            Path.Combine(
+            //                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            //                @".nuget\packages\scriban\5.0.0\lib\netstandard2.0\Scriban.dll"));
+            //    }
 
-                return null;
-            };
+            //    return null;
+            //};
         }
 
         public void Execute(GeneratorExecutionContext context)
