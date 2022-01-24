@@ -2,12 +2,14 @@
 
 namespace Enclave.FastPacket.Generator.PositionProviders
 {
-    internal class FunctionPositionExplicitDefaultProvider : ConstantPositionProvider
+    internal class FunctionPositionExplicitDefaultProvider : IPositionProvider
     {
+        private readonly int _explicitPosition;
+
         public FunctionPositionExplicitDefaultProvider(IMethodSymbol positionMethod, int explicitPosition)
-            : base(explicitPosition)
         {
             Method = positionMethod;
+            _explicitPosition = explicitPosition;
             FullReferenceName = positionMethod.GetFullyQualifiedReference();
         }
 
@@ -15,11 +17,11 @@ namespace Enclave.FastPacket.Generator.PositionProviders
 
         public string FullReferenceName { get; }
 
-        public override string GetPositionExpression(string spanName)
+        public string GetPositionExpression(string spanName)
         {
             // Automatic position calculation is just based on the position expression of the previous property,
             // plus the size (to take us to the start of this field).
-            return $"{FullReferenceName}({spanName}, {base.GetPositionExpression(spanName)})";
+            return $"{FullReferenceName}({spanName}, {_explicitPosition})";
         }
     }
 }

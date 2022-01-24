@@ -1,9 +1,8 @@
-﻿using Enclave.FastPacket.Generator.ValueProviders;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator.SizeProviders
 {
-    internal class SizeOfSizeProvider : ISizeProvider
+    internal class SizeOfSizeProvider : IConstantSizeProvider
     {
         public SizeOfSizeProvider(INamedTypeSymbol typeSymbol)
         {
@@ -15,9 +14,8 @@ namespace Enclave.FastPacket.Generator.SizeProviders
 
         public string TypeReferenceName { get; }
 
-        public string GetSizeExpression(string spanName, string positionExpression)
-        {
-            return $"sizeof({TypeReferenceName})";
-        }
+        public string GetConstantSizeExpression() => $"sizeof({TypeReferenceName})";
+
+        public string GetSizeExpression(string spanName, string positionExpression) => GetConstantSizeExpression();
     }
 }

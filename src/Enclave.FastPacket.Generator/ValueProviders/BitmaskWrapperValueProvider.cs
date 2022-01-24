@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using Enclave.FastPacket.Generator.SizeProviders;
 using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator.ValueProviders

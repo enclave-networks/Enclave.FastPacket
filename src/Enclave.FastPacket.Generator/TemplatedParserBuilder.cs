@@ -24,6 +24,7 @@ namespace Enclave.FastPacket.Generator
                 Namespace = structSymbol.GetFullNamespace(),
                 TypeName = structSymbol.Name,
                 Props = packetDef.PropertySet.ToList(),
+                MinSizeExpression = packetDef.MinSizeExpression,
             },
             renamer: m => m.Name);
 

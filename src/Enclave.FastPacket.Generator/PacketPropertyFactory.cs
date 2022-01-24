@@ -266,7 +266,7 @@ namespace Enclave.FastPacket.Generator
             }
             else if (options.Position.HasValue)
             {
-                positionProvider = new ConstantPositionProvider(options.Position.Value);
+                positionProvider = new ExplicitPositionProvider(options.Position.Value);
             }
 
             if (positionProvider is null)

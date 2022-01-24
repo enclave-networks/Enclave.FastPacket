@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Enclave.FastPacket.Generator.PositionProviders;
+using Enclave.FastPacket.Generator.SizeProviders;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -151,6 +153,24 @@ namespace Enclave.FastPacket.Generator
             INamedTypeSymbol? currentUnion = null;
             IPacketProperty? currentUnionProperty = null;
 
+            var listMinSize = new List<string>();
+
+            void UpdateMinimumSizeEntries(IPacketProperty? createdProp)
+            {
+                if (createdProp!.PositionProvider is IConstantPositionProvider constantPosition)
+                {
+                    // Fixed position.
+                    listMinSize.Clear();
+
+                    listMinSize.Add(constantPosition.GetConstantPositionExpression());
+                }
+
+                if (createdProp.SizeProvider is IConstantSizeProvider constantSize)
+                {
+                    listMinSize.Add(constantSize.GetConstantSizeExpression());
+                }
+            }
+
             for (int idx = 0; idx < propertySymbolSet.Count; idx++)
             {
                 var (propSymbol, unionSymbol) = propertySymbolSet[idx];
@@ -170,6 +190,8 @@ namespace Enclave.FastPacket.Generator
                     if (currentUnionProperty is not null)
                     {
                         lastProp = currentUnionProperty;
+
+                        UpdateMinimumSizeEntries(currentUnionProperty);
                     }
 
                     currentUnion = unionSymbol;
@@ -198,11 +220,20 @@ namespace Enclave.FastPacket.Generator
                     if (currentUnionProperty is null)
                     {
                         lastProp = createdProp;
+
+                        UpdateMinimumSizeEntries(createdProp);
                     }
                 }
             }
 
-            return new PacketParserDefinition(propertySet);
+            string minSizeExpression = "0";
+
+            if (listMinSize.Count > 0)
+            {
+                minSizeExpression = string.Join(" + ", listMinSize);
+            }
+
+            return new PacketParserDefinition(propertySet, minSizeExpression);
         }
 
         private bool ValidateType(GeneratorExecutionContext context, GenerationOptions options, StructDeclarationSyntax owner, INamedTypeSymbol symbol)

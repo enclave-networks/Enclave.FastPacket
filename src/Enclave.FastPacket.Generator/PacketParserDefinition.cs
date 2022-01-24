@@ -1,15 +1,17 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace Enclave.FastPacket.Generator
 {
     internal class PacketParserDefinition
     {
-        public PacketParserDefinition(IList<IPacketProperty> propertySet)
+        public PacketParserDefinition(IList<IPacketProperty> propertySet, string minSizeExpression)
         {
             PropertySet = propertySet;
+            MinSizeExpression = minSizeExpression;
         }
 
         public IList<IPacketProperty> PropertySet { get; }
+
+        public string MinSizeExpression { get; }
     }
 }

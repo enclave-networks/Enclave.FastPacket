@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Enclave.FastPacket.Generator.PositionProviders;
+using Enclave.FastPacket.Generator.SizeProviders;
 using Enclave.FastPacket.Generator.ValueProviders;
 
 namespace Enclave.FastPacket.Generator

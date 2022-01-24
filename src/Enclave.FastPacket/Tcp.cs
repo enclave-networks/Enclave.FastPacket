@@ -50,13 +50,17 @@ internal ref struct TcpPacketDefinition
 
     public static int GetOptionSize(ReadOnlySpan<byte> packet)
     {
-        return (new TcpPacketReadOnlySpan(packet).DataOffset - 5) * 32;
+        return (new TcpPacketReadOnlySpan(packet).DataOffset - 5) * 4;
     }
 }
 
 [PacketImplementation(typeof(TcpPacketDefinition))]
 public readonly ref partial struct TcpPacketSpan
 {
+    public static int GetRequiredPacketSize(int payloadSize)
+    {
+        return MinimumSize + payloadSize;
+    }
 }
 
 [PacketImplementation(typeof(TcpPacketDefinition), IsReadOnly = true)]

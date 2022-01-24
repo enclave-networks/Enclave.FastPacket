@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using Enclave.FastPacket.Generator.ValueProviders;
 using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator.SizeProviders

@@ -76,7 +76,7 @@ public class PacketInspectionBenchmark
 
             if (ipPacket.Protocol == System.Net.Sockets.ProtocolType.Udp)
             {
-                var udpPacket = new UdpPacketSpan(ipPacket.Payload);
+                var udpPacket = new Udp(ipPacket.Payload);
 
                 var srcPort = udpPacket.SourcePort;
                 var dstPort = udpPacket.DestinationPort;
@@ -131,7 +131,7 @@ public class PacketInspectionBenchmark
 
             if (ipPacket.Protocol == System.Net.Sockets.ProtocolType.Udp)
             {
-                var udpPacket = new UdpPacketSpan(ipPacket.Payload);
+                var udpPacket = new Udp(ipPacket.Payload);
 
                 foreach (var i in Enumerable.Range(0, 1000))
                 {

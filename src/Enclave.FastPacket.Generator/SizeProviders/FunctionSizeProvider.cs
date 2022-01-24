@@ -1,5 +1,4 @@
-﻿using Enclave.FastPacket.Generator.ValueProviders;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator.SizeProviders
 {

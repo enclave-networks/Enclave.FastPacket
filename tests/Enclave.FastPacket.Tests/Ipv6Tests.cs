@@ -14,7 +14,10 @@ public class Ipv6Tests
         var destIp = IPAddress.Parse("2001:db8::123.123.123.123");
 
         var packet = new PacketDotNet.IPv6Packet(sourceIp, destIp);
-
+        packet.HopLimit = 10;
+        packet.TrafficClass = 5;
+        packet.FlowLabel = 1056;
+        
         var payload = new UdpPacket(1024, 65102);
         payload.PayloadData = new byte[] { 0x01, 0x02, 0x03 };
 
@@ -24,9 +27,9 @@ public class Ipv6Tests
 
         var myIp = new Ipv6PacketSpan(packetData);
 
-        Assert.AreEqual(System.Net.Sockets.ProtocolType.Udp, myIp.Protocol);
-        Assert.AreEqual(sourceIp, myIp.Source.ToIpAddress());
-        Assert.AreEqual(destIp, myIp.Destination.ToIpAddress());
+        Assert.AreEqual(System.Net.Sockets.ProtocolType.Udp, myIp.NextHeader);
+        Assert.AreEqual(sourceIp, myIp.SourceAddress.ToIpAddress());
+        Assert.AreEqual(destIp, myIp.DestinationAddress.ToIpAddress());
 
         var udp = new UdpPacketSpan(myIp.Payload);
 
@@ -52,9 +55,9 @@ public class Ipv6Tests
 
         var myIp = new Ipv6PacketSpan(packetData);
 
-        Assert.AreEqual(System.Net.Sockets.ProtocolType.Tcp, myIp.Protocol);
-        Assert.AreEqual(sourceIp, myIp.Source.ToIpAddress());
-        Assert.AreEqual(destIp, myIp.Destination.ToIpAddress());
+        Assert.AreEqual(System.Net.Sockets.ProtocolType.Tcp, myIp.NextHeader);
+        Assert.AreEqual(sourceIp, myIp.SourceAddress.ToIpAddress());
+        Assert.AreEqual(destIp, myIp.DestinationAddress.ToIpAddress());
 
         var tcp = new TcpPacketSpan(myIp.Payload);
 

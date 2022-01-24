@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using Enclave.FastPacket.Generator.SizeProviders;
 using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator.ValueProviders

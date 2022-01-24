@@ -1,6 +1,6 @@
-﻿using Enclave.FastPacket.Generator;
-using System;
+﻿using System;
 using System.Buffers.Binary;
+using Enclave.FastPacket.Generator;
 
 namespace Enclave.FastPacket;
 
@@ -19,5 +19,10 @@ internal ref struct UdpPacketDefinition
 
 [PacketImplementation(typeof(UdpPacketDefinition))]
 public readonly ref partial struct UdpPacketSpan
+{
+}
+
+[PacketImplementation(typeof(UdpPacketDefinition), IsReadOnly = true)]
+public readonly ref partial struct UdpPacketReadOnlySpan
 {
 }

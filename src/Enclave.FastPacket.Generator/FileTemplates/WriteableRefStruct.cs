@@ -9,6 +9,12 @@ namespace {{Namespace}}
     {
         private readonly Span<byte> _span;
 
+        /// <summary>
+        /// Defines the minimum possible size of this packet, given all
+        /// known fixed sizes.
+        /// </summary>
+        public const int MinimumSize = {{ MinSizeExpression }};
+
         public {{TypeName}}(Span<byte> packetData)
         {
             _span = packetData;

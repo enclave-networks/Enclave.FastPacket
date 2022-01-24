@@ -29,7 +29,7 @@ public class Ipv4Tests
 
         var packetData = packet.Bytes;
 
-        var myIp = new Ipv4(packetData);
+        var myIp = new Ipv4PacketReadOnlySpan(packetData);
 
         Assert.AreEqual(System.Net.Sockets.ProtocolType.Udp, myIp.Protocol);
         Assert.AreEqual(sourceIp, myIp.Source.ToIpAddress());
@@ -41,7 +41,7 @@ public class Ipv4Tests
         Assert.AreEqual(15, myIp.Ttl);
         Assert.AreEqual(0, myIp.Options.Length);
         
-        var udp = new UdpPacketSpan(myIp.Payload);
+        var udp = new UdpPacketReadOnlySpan(myIp.Payload);
 
         Assert.AreEqual(1024, udp.SourcePort);
         Assert.AreEqual(65102, udp.DestinationPort);
@@ -66,13 +66,13 @@ public class Ipv4Tests
 
         var packetData = packet.Bytes;
 
-        var myIp = new Ipv4(packetData);
+        var myIp = new Ipv4PacketReadOnlySpan(packetData);
 
         Assert.AreEqual(System.Net.Sockets.ProtocolType.Tcp, myIp.Protocol);
         Assert.AreEqual(sourceIp, myIp.Source.ToIpAddress());
         Assert.AreEqual(destIp, myIp.Destination.ToIpAddress());
 
-        var tcp = new TcpPacketSpan(myIp.Payload);
+        var tcp = new TcpPacketReadOnlySpan(myIp.Payload);
 
         Assert.AreEqual(1024, tcp.SourcePort);
         Assert.AreEqual(65102, tcp.DestinationPort);
@@ -99,7 +99,7 @@ public class Ipv4Tests
 
         var packetData = packet.Bytes;
 
-        var myIp = new Ipv4(packetData);
+        var myIp = new Ipv4PacketSpan(packetData);
 
         Assert.AreEqual(System.Net.Sockets.ProtocolType.Icmp, myIp.Protocol);
         Assert.AreEqual(sourceIp, myIp.Source.ToIpAddress());

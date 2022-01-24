@@ -1,10 +1,9 @@
 ﻿using System.Globalization;
-using Enclave.FastPacket.Generator.ValueProviders;
 using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator.SizeProviders
 {
-    internal class ExplicitSizeProvider : ISizeProvider
+    internal class ExplicitSizeProvider : IConstantSizeProvider
     {
         private readonly int _explicitSize;
 
@@ -13,7 +12,10 @@ namespace Enclave.FastPacket.Generator.SizeProviders
             _explicitSize = explicitSize;
         }
 
-        public string GetSizeExpression(string spanName, string positionExpression)
+        public string GetConstantSizeExpression()
             => _explicitSize.ToString(CultureInfo.InvariantCulture);
+
+        public string GetSizeExpression(string spanName, string positionExpression)
+            => GetConstantSizeExpression();
     }
 }
