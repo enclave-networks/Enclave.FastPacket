@@ -8,47 +8,52 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<!-- Do not include the generator as a lib dependency -->
 		<IncludeBuildOutput>false</IncludeBuildOutput>
-		<Authors>Alistair Evans</Authors>
-		<Description>Generate strongly-typed identifiers for your entity IDs, using a source generator.</Description>
-		<Copyright>Alistair Evans 2021</Copyright>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://github.com/alistairjevans/TypedIds</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/alistairjevans/TypedIds</RepositoryUrl>
-		<RepositoryType>GitHub</RepositoryType>
-		<PackageTags>generator</PackageTags>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
+        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+        <DevelopmentDependency>true</DevelopmentDependency>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <NoPackageAnalysis>true</NoPackageAnalysis>
         <Nullable>enable</Nullable>
+
+        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddGeneratorsToOutput</TargetsForTfmSpecificContentInPackage>
 	</PropertyGroup>
+
+    <PropertyGroup>
+        <Authors>Enclave Networks</Authors>
+        <Description>Generate fast packet parsers from a packet description..</Description>
+        <Copyright>Enclave Networks 2022</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/enclave-networks/Enclave.FastPacket</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/enclave-networks/Enclave.FastPacket</RepositoryUrl>
+        <RepositoryType>GitHub</RepositoryType>
+        <PackageTags>generator</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
 
 	<ItemGroup>
 		<!-- Package the generator in the analyzer directory of the nuget package -->
-		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.0.1" />
-		<PackageReference Include="Scriban" Version="5.0.0" PrivateAssets="all" GeneratePathProperty="true" />
-
-        <!-- Package the Scriban dependency alongside the generator assembly -->
-        <None Include="$(PkgScriban)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.0.1" />
+        <PackageReference Include="Scriban" Version="5.0.0" PrivateAssets="all" GeneratePathProperty="true" />
+    </ItemGroup>
+    
+    <Target Name="_AddGeneratorsToOutput">
+        <ItemGroup>
+            <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).dll" PackagePath="analyzers/dotnet/cs" />
+            <TfmSpecificPackageFile Include="$(PkgScriban)\lib\netstandard2.0\*.dll" PackagePath="analyzers/dotnet/cs" />
+        </ItemGroup>
+    </Target>
 
     <ItemGroup>
-        <!--<Compile Remove="FileTemplates/*" />-->
+        <Compile Remove="FileTemplates/*" />
         <EmbeddedResource Include="FileTemplates/*" />
-    </ItemGroup>
 
-    <ItemGroup>
-        <!--<Compile Remove="ExpressionTemplates/*" />-->
-        <EmbeddedResource Include="ExpressionTemplates/*" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="FileTemplates\ReadOnlyRefStruct.cs" />
-      <Compile Remove="FileTemplates\WriteableRefStruct.cs" />
+        <Compile Include="FileTemplates/PacketFieldAttribute.cs" />
+        <Compile Include="FileTemplates/PacketImplementationAttribute.cs" />
     </ItemGroup>
 
 </Project>

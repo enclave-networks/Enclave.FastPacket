@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
-namespace Enclave.FastPacket.Generator
+namespace Enclave.FastPacket.Generator.ValueProviders
 {
 
     internal class CustomProviderResult

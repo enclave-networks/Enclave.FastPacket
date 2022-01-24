@@ -15,6 +15,11 @@ public class Ipv4Tests
         var destIp = IPAddress.Parse("127.0.0.2");
 
         var packet = new PacketDotNet.IPv4Packet(sourceIp, destIp);
+        packet.FragmentFlags = 2;
+        packet.FragmentOffset = 56;
+        packet.Id = 10;
+        packet.HopLimit = 15;
+        packet.DifferentiatedServices = 2;
 
         var payload = new UdpPacket(1024, 65102);
         payload.PayloadData = new byte[] { 0x01, 0x02, 0x03 };
@@ -28,7 +33,13 @@ public class Ipv4Tests
         Assert.AreEqual(System.Net.Sockets.ProtocolType.Udp, myIp.Protocol);
         Assert.AreEqual(sourceIp, myIp.Source.ToIpAddress());
         Assert.AreEqual(destIp, myIp.Destination.ToIpAddress());
-
+        Assert.AreEqual(FragmentFlags.MoreFragments, myIp.FragmentFlags);
+        Assert.AreEqual(56, myIp.FragmentValue);
+        Assert.AreEqual(10, myIp.Identification);
+        Assert.AreEqual(2, myIp.Dscp);
+        Assert.AreEqual(15, myIp.Ttl);
+        Assert.AreEqual(0, myIp.Options.Length);
+        
         var udp = new UdpPacketSpan(myIp.Payload);
 
         Assert.AreEqual(1024, udp.SourcePort);

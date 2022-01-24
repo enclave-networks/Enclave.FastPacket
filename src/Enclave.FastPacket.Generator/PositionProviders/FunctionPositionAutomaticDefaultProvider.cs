@@ -6,7 +6,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Enclave.FastPacket.Generator
+namespace Enclave.FastPacket.Generator.PositionProviders
 {
 
     internal class FunctionPositionAutomaticDefaultProvider : AutomaticPositionProvider

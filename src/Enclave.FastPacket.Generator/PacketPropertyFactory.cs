@@ -4,17 +4,18 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using Enclave.FastPacket.Generator.PositionProviders;
+using Enclave.FastPacket.Generator.SizeProviders;
 using Enclave.FastPacket.Generator.ValueProviders;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FlowAnalysis;
 
 namespace Enclave.FastPacket.Generator
 {
-
     internal class PacketPropertyFactory
     {
         private readonly GeneratorExecutionContext _ctxt;
-        private readonly PacketFieldAttribute _defaultFieldAttribute = new PacketFieldAttribute();
 
         private readonly Dictionary<INamedTypeSymbol, (ISizeProvider Size, IValueProvider Value)> _supportedNumericTypes;
 
@@ -51,8 +52,6 @@ namespace Enclave.FastPacket.Generator
 
             _supportedNumericTypes = new Dictionary<INamedTypeSymbol, (ISizeProvider Size, IValueProvider Value)>(SymbolEqualityComparer.Default);
 
-            INamedTypeSymbol GetSpecialType(SpecialType specialType) => ctxt.Compilation.GetSpecialType(specialType);
-
             void AddPrimitiveType(SpecialType type, IValueProvider? customProvider = null)
             {
                 var symbol = GetSpecialType(type);
@@ -68,143 +67,150 @@ namespace Enclave.FastPacket.Generator
             AddPrimitiveType(SpecialType.System_Byte, new SingleByteValueProvider(GetSpecialType(SpecialType.System_Byte)));
         }
 
+        private INamedTypeSymbol GetSpecialType(SpecialType specialType)
+            => _ctxt.Compilation.GetSpecialType(specialType);
+
         public INamedTypeSymbol ReadOnlySpanByteType { get; }
 
         public INamedTypeSymbol SpanByteType { get; }
 
-        private struct PacketFieldOptions
+        public bool TryCreateUnion(INamedTypeSymbol definitionType, INamedTypeSymbol unionType, IPacketProperty? previousProperty, out IPacketProperty? virtualUnionProperty)
         {
-            public int? Size { get; set; }
+            Location defLocation = unionType.Locations.First();
+            Location configurationLocation = defLocation;
 
-            public int? Position { get; set; }
+            var options = GetPacketFieldOptions(unionType, ref configurationLocation);
 
-            public string? PositionFunction { get; set; }
+            var (positionProvider, sizeProvider) = GetDefaultSizeAndPositionProvider(definitionType, previousProperty, configurationLocation, options);
 
-            public INamedTypeSymbol? EnumBackingType { get; set; }
+            if (sizeProvider is null)
+            {
+                _ctxt.ReportDiagnostic(Diagnostic.Create(Diagnostics.UnionsShouldHaveDeclaredSize, configurationLocation, unionType.Name));
+
+                virtualUnionProperty = null;
+                return false;
+            }
+
+            IEnumerable<string> docComments = GetDocComments(unionType);
+
+            virtualUnionProperty = new VirtualUnionProperty(unionType.Name, positionProvider, sizeProvider, docComments);
+            return true;
         }
 
-        public bool TryCreate(IPropertySymbol propSymbol, IPacketProperty? previousProperty, bool isLast, out IPacketProperty? packetProperty)
+        public bool TryCreate(INamedTypeSymbol definitionType, IPropertySymbol propSymbol, IPacketProperty? previousProperty, bool isLast, out IPacketProperty? packetProperty)
         {
-            // Look for the attribute.
-            var attributeSymbol = propSymbol.GetAttributes().FirstOrDefault(x =>
-                x.AttributeClass is INamedTypeSymbol symbol &&
-                x.AttributeClass is not IErrorTypeSymbol &&
-                symbol.ToDisplayString() == "Enclave.FastPacket.Generator.PacketFieldAttribute");
+            Location propLocation = propSymbol.Locations.First();
+            Location configurationLocation = propLocation;
 
-            IPositionProvider? positionProvider = null;
-            ISizeProvider? sizeProvider = null;
-            PacketFieldOptions options = default;
+            var options = GetPacketFieldOptions(propSymbol, ref configurationLocation);
 
-            if (attributeSymbol is AttributeData attrData)
-            {
-                // Now we can determine the list of named properties on the attribute.
-                foreach (var namedArg in attrData.NamedArguments)
-                {
-                    var argValue = namedArg.Value;
-
-                    if (argValue.Kind == TypedConstantKind.Error || argValue.Value is null)
-                    {
-                        continue;
-                    }
-
-                    if (namedArg.Key == nameof(PacketFieldAttribute.Position))
-                    {
-                        options.Position = (int)argValue.Value;
-                    }
-                    else if (namedArg.Key == nameof(PacketFieldAttribute.Size))
-                    {
-                        options.Size = (int)argValue.Value;
-                    }
-                    else if (namedArg.Key == nameof(PacketFieldAttribute.PositionFunction))
-                    {
-                        options.PositionFunction = argValue.Value as string;
-                    }
-                    else if (namedArg.Key == nameof(PacketFieldAttribute.EnumBackingType))
-                    {
-                        options.EnumBackingType = argValue.Value as INamedTypeSymbol;
-                    }
-                }
-
-                var syntaxRef = attributeSymbol.ApplicationSyntaxReference?.SyntaxTree.GetLocation(attributeSymbol.ApplicationSyntaxReference.Span);
-
-                if (options.PositionFunction is string && TryGetPositionMethod(propSymbol.ContainingType, options.PositionFunction, syntaxRef, out var positionMethod))
-                {
-                    if (options.Position.HasValue)
-                    {
-                        positionProvider = new FunctionPositionExplicitDefaultProvider(positionMethod!, options.Position.Value);
-                    }
-                    else
-                    {
-                        positionProvider = new FunctionPositionAutomaticDefaultProvider(positionMethod!, previousProperty);
-                    }
-                }
-                else if (options.Position.HasValue)
-                {
-                    positionProvider = new ConstantPositionProvider(options.Position.Value);
-                }
-            }
-
-            if (positionProvider is null)
-            {
-                // Fall back to automatic position determination by default.
-                positionProvider = new AutomaticPositionProvider(previousProperty);
-            }
-
-            if (options.Size.HasValue)
-            {
-                sizeProvider = new ExplicitSizeProvider(options.Size.Value);
-            }
+            var (positionProvider, sizeProvider) = GetDefaultSizeAndPositionProvider(definitionType, previousProperty, configurationLocation, options);
 
             IValueProvider? valueProvider = null;
+
+            // Default to not supporting a bitmask unless we actually do.
+            bool bitMaskNotSupported = options.Bitmask.HasValue;
 
             // If the type symbol is something that actually exists...
             if (propSymbol.Type is INamedTypeSymbol propType && propSymbol.Type is not IErrorTypeSymbol)
             {
-                // Basic provider.
-                if (_supportedNumericTypes.TryGetValue(propType, out var providers))
-                {
-                    valueProvider = providers.Value;
-                    sizeProvider = providers.Size;
-                }
-                else if (propType.EnumUnderlyingType is not null)
-                {
-                    var customEnumBackingType = options.EnumBackingType;
+                var readType = propType;
 
-                    var underlyingType = propType.EnumUnderlyingType;
+                if (options.Bitmask.HasValue)
+                {
+                    // The actual 'thing' we use is going to be based on the position of the last bits of the
+                    // bitmask.
+                    var lastBit = 63 - BitMaskHelpers.LeadingZeroCount(options.Bitmask.Value);
 
-                    if (customEnumBackingType is INamedTypeSymbol)
+                    if (lastBit < 8)
                     {
-                        underlyingType = customEnumBackingType;
+                        readType = GetSpecialType(SpecialType.System_Byte);
                     }
-
-                    if (_supportedNumericTypes.TryGetValue(underlyingType, out var underlyingProviders))
+                    else if (lastBit < 16)
                     {
-                        valueProvider = new CastingValueProvider(propType, underlyingProviders.Value);
-
-                        // Only use the enums' size if we haven't specified a specific size.
-                        sizeProvider = underlyingProviders.Size;
+                        readType = GetSpecialType(SpecialType.System_UInt16);
+                    }
+                    else if (lastBit < 32)
+                    {
+                        readType = GetSpecialType(SpecialType.System_UInt32);
+                    }
+                    else if (lastBit < 64)
+                    {
+                        readType = GetSpecialType(SpecialType.System_UInt64);
                     }
                     else
                     {
-                        _ctxt.ReportDiagnostic(Diagnostic.Create(Diagnostics.EnumUnderlyingTypeInvalid, propSymbol.Locations.First(), propType.Name, underlyingType.Name));
+                        // Diagnostic?
+                    }
+                }
+
+                // Basic provider.
+                if (_supportedNumericTypes.TryGetValue(readType, out var providers))
+                {
+                    valueProvider = providers.Value;
+
+                    sizeProvider ??= providers.Size;
+
+                    if (options.Bitmask.HasValue)
+                    {
+                        valueProvider = new BitmaskWrapperValueProvider(options.Bitmask.Value, valueProvider, sizeProvider);
+                    }
+
+                    if (!SymbolEqualityComparer.Default.Equals(readType, propType))
+                    {
+                        // Cast it.
+                        valueProvider = new CastingValueProvider(propType, valueProvider);
+                    }
+                }
+                else if (propType.EnumUnderlyingType is not null)
+                {
+                    if (!options.Bitmask.HasValue)
+                    {
+                        readType = propType.EnumUnderlyingType;
+
+                        if (options.EnumBackingType is INamedTypeSymbol)
+                        {
+                            readType = options.EnumBackingType;
+                        }
+                    }
+
+                    if (_supportedNumericTypes.TryGetValue(readType, out var underlyingProviders))
+                    {
+                        // Only use the enums' size if we haven't specified a specific size.
+                        sizeProvider ??= underlyingProviders.Size;
+
+                        var enumValueProvider = underlyingProviders.Value;
+
+                        if (options.Bitmask.HasValue)
+                        {
+                            enumValueProvider = new BitmaskWrapperValueProvider(options.Bitmask.Value, enumValueProvider, sizeProvider);
+                        }
+
+                        valueProvider = new CastingValueProvider(propType, enumValueProvider);
+                    }
+                    else
+                    {
+                        _ctxt.ReportDiagnostic(Diagnostic.Create(Diagnostics.EnumUnderlyingTypeInvalid, propSymbol.Locations.First(), propType.Name, readType.Name));
                     }
                 }
                 else if (propType.Equals(ReadOnlySpanByteType, SymbolEqualityComparer.Default) ||
                          propType.Equals(SpanByteType, SymbolEqualityComparer.Default))
                 {
-                    if (isLast)
+                    if (sizeProvider is null)
                     {
-                        valueProvider = _remainingSpanValueProvider;
-                        sizeProvider = UnknownSizeProvider.Instance;
-                    }
-                    else if (options.Size.HasValue)
-                    {
-                        sizeProvider = new ExplicitSizeProvider(options.Size.Value);
-                        valueProvider = new SpanKnownSizeValueProvider(SpanByteType, sizeProvider);
+                        if (isLast)
+                        {
+                            valueProvider = _remainingSpanValueProvider;
+                            sizeProvider ??= UnknownSizeProvider.Instance;
+                        }
+                        else
+                        {
+                            _ctxt.ReportDiagnostic(Diagnostic.Create(Diagnostics.SpanInMiddleOfPacketMustHaveSize, propSymbol.Locations.First(), propType.Name));
+                        }
                     }
                     else
                     {
-                        _ctxt.ReportDiagnostic(Diagnostic.Create(Diagnostics.SpanInMiddleOfPacketMustHaveSize, propSymbol.Locations.First(), propType.Name));
+                        valueProvider = new SpanKnownSizeValueProvider(SpanByteType, sizeProvider);
                     }
                 }
                 else
@@ -225,12 +231,65 @@ namespace Enclave.FastPacket.Generator
                     else
                     {
                         valueProvider = custom.Value;
-                        sizeProvider = custom.Size;
+                        sizeProvider ??= custom.Size;
                     }
                 }
             }
 
-            var docCommentXml = propSymbol.GetDocumentationCommentXml();
+            IEnumerable<string> docComments = GetDocComments(propSymbol);
+
+            if (positionProvider is not null && valueProvider is not null && sizeProvider is not null)
+            {
+                packetProperty = new PacketProperty(propSymbol.Name, options, positionProvider, sizeProvider, valueProvider, docComments);
+                return true;
+            }
+
+            packetProperty = null;
+            return false;
+        }
+
+        private (IPositionProvider Position, ISizeProvider? Size) GetDefaultSizeAndPositionProvider(INamedTypeSymbol definitionType, IPacketProperty? previousProperty, Location configurationLocation, PacketFieldOptions options)
+        {
+            IPositionProvider? positionProvider = null;
+            ISizeProvider? sizeProvider = null;
+
+            if (options.PositionFunction is string && TryGetPositionMethod(definitionType, options.PositionFunction, configurationLocation, out var positionMethod))
+            {
+                if (options.Position.HasValue)
+                {
+                    positionProvider = new FunctionPositionExplicitDefaultProvider(positionMethod!, options.Position.Value);
+                }
+                else
+                {
+                    positionProvider = new FunctionPositionAutomaticDefaultProvider(positionMethod!, previousProperty);
+                }
+            }
+            else if (options.Position.HasValue)
+            {
+                positionProvider = new ConstantPositionProvider(options.Position.Value);
+            }
+
+            if (positionProvider is null)
+            {
+                // Fall back to automatic position determination by default.
+                positionProvider = new AutomaticPositionProvider(previousProperty);
+            }
+
+            if (options.SizeFunction is string && TryGetSizeMethod(definitionType, options.SizeFunction, configurationLocation, out var sizeMethod))
+            {
+                sizeProvider = new FunctionSizeProvider(sizeMethod!);
+            }
+            else if (options.Size.HasValue)
+            {
+                sizeProvider = new ExplicitSizeProvider(options.Size.Value);
+            }
+
+            return (positionProvider, sizeProvider);
+        }
+
+        private static IEnumerable<string> GetDocComments(ISymbol symbol)
+        {
+            var docCommentXml = symbol.GetDocumentationCommentXml();
 
             IEnumerable<string> docComments;
 
@@ -260,14 +319,112 @@ namespace Enclave.FastPacket.Generator
                 docComments = Array.Empty<string>();
             }
 
-            if (positionProvider is not null && valueProvider is not null && sizeProvider is not null)
+            return docComments;
+        }
+
+        private static PacketFieldOptions GetPacketFieldOptions(ISymbol owningSymbol, ref Location configurationLocation)
+        {
+            PacketFieldOptions options = default;
+
+            var packetFieldAttr = owningSymbol.GetAttributes().FirstOrDefault(x =>
+                x.AttributeClass is INamedTypeSymbol symbol &&
+                x.AttributeClass is not IErrorTypeSymbol &&
+                symbol.ToDisplayString() == "Enclave.FastPacket.Generator.PacketFieldAttribute");
+
+            if (packetFieldAttr is AttributeData attrData)
             {
-                packetProperty = new PacketProperty(propSymbol.Name, positionProvider, sizeProvider, valueProvider, docComments);
-                return true;
+                // Now we can determine the list of named properties on the attribute.
+                foreach (var namedArg in attrData.NamedArguments)
+                {
+                    var argValue = namedArg.Value;
+
+                    if (argValue.Kind == TypedConstantKind.Error || argValue.Value is null)
+                    {
+                        continue;
+                    }
+
+                    switch (namedArg.Key)
+                    {
+                        case nameof(PacketFieldAttribute.Position):
+                            options.Position = (int)argValue.Value;
+                            break;
+                        case nameof(PacketFieldAttribute.Size):
+                            options.Size = (int)argValue.Value;
+                            break;
+                        case nameof(PacketFieldAttribute.PositionFunction):
+                            options.PositionFunction = argValue.Value as string;
+                            break;
+                        case nameof(PacketFieldAttribute.EnumBackingType):
+                            options.EnumBackingType = argValue.Value as INamedTypeSymbol;
+                            break;
+                        case nameof(PacketFieldAttribute.Bitmask):
+                            options.Bitmask = (ulong)argValue.Value;
+                            break;
+                        case nameof(PacketFieldAttribute.SizeFunction):
+                            options.SizeFunction = argValue.Value as string;
+                            break;
+                    }
+                }
+
+                var foundLocation = packetFieldAttr.ApplicationSyntaxReference?.SyntaxTree.GetLocation(packetFieldAttr.ApplicationSyntaxReference.Span);
+
+                if (foundLocation is not null)
+                {
+                    configurationLocation = foundLocation;
+                }
             }
 
-            packetProperty = null;
-            return false;
+            var packetFieldBitsAttr = owningSymbol.GetAttributes().FirstOrDefault(x =>
+                x.AttributeClass is INamedTypeSymbol symbol &&
+                x.AttributeClass is not IErrorTypeSymbol &&
+                symbol.ToDisplayString() == "Enclave.FastPacket.Generator.PacketFieldBitsAttribute");
+
+            if (packetFieldBitsAttr is AttributeData)
+            {
+                static bool TryGetIntArg(TypedConstant arg, out int value)
+                {
+                    if (arg.Kind != TypedConstantKind.Error && arg.Value is uint found)
+                    {
+                        value = (int)found;
+                        return true;
+                    }
+
+                    value = 0;
+                    return false;
+                }
+
+                if (packetFieldBitsAttr.ConstructorArguments.Length == 2)
+                {
+                    if (TryGetIntArg(packetFieldBitsAttr.ConstructorArguments[0], out var firstBit) &&
+                        TryGetIntArg(packetFieldBitsAttr.ConstructorArguments[1], out var lastBit))
+                    {
+                        if (lastBit >= firstBit)
+                        {
+                            // Intentional int arithmetic, only care about the whole bytes.
+                            var numberOfWholeBytes = lastBit / 8;
+
+                            var lastBitInMask = (8 * (numberOfWholeBytes + 1)) - 1;
+
+                            // Generate the bitmask for MSB0 designation.
+                            // This is when we invert the bit order.
+                            ulong bitMask = 0;
+
+                            for (int bitPos = lastBitInMask - firstBit; bitPos >= lastBitInMask - lastBit; bitPos--)
+                            {
+                                bitMask |= 1UL << bitPos;
+                            }
+
+                            options.Bitmask = bitMask;
+                        }
+                        else
+                        {
+                            // Raise a diagnostic.
+                        }
+                    }
+                }
+            }
+
+            return options;
         }
 
         private (IValueProvider? Value, ISizeProvider? Size) GetCustomValueProvider(INamedTypeSymbol type, IPropertySymbol propSymbol)
@@ -369,24 +526,13 @@ namespace Enclave.FastPacket.Generator
                     var methodArgs = methodSymbol.Parameters;
                     diagnosticMessage = Diagnostics.PositionFunctionUnexpectedSignature;
 
-                    if (methodArgs.Length == 2)
+                    if (MethodParametersMatch(methodSymbol, ReadOnlySpanByteType, _ctxt.Compilation.GetSpecialType(SpecialType.System_Int32)) &&
+                        MethodReturnTypeMatches(methodSymbol, _ctxt.Compilation.GetSpecialType(SpecialType.System_Int32)))
                     {
-                        // Should be 2 arguments.
-                        var spanArg = methodArgs[0];
-                        var positionArg = methodArgs[1];
-
-                        if (spanArg.Type is INamedTypeSymbol spanTypeSymbol &&
-                            SymbolEqualityComparer.Default.Equals(spanTypeSymbol, ReadOnlySpanByteType) &&
-                            positionArg.Type is INamedTypeSymbol posTypeSymbol &&
-                            SymbolEqualityComparer.Default.Equals(posTypeSymbol, _ctxt.Compilation.GetSpecialType(SpecialType.System_Int32)) &&
-                            methodSymbol.ReturnType is INamedTypeSymbol returnSymbol &&
-                            SymbolEqualityComparer.Default.Equals(returnSymbol, _ctxt.Compilation.GetSpecialType(SpecialType.System_Int32)))
-                        {
-                            // Looks good. Choose this one.
-                            // No errors.
-                            diagnosticMessage = null;
-                            positionMethod = methodSymbol;
-                        }
+                        // Looks good. Choose this one.
+                        // No errors.
+                        diagnosticMessage = null;
+                        positionMethod = methodSymbol;
                     }
                 }
             }
@@ -400,7 +546,45 @@ namespace Enclave.FastPacket.Generator
             return true;
         }
 
-        private bool MethodParametersMatch(IMethodSymbol method, params INamedTypeSymbol[] expected)
+        private bool TryGetSizeMethod(INamedTypeSymbol containingType, string declaredName, Location? diagnosticLocation, out IMethodSymbol? positionMethod)
+        {
+            var foundMembers = containingType.GetMembers(declaredName);
+            DiagnosticDescriptor? diagnosticMessage = Diagnostics.SizeFunctionIsNotFound;
+            positionMethod = null;
+
+            foreach (var member in foundMembers)
+            {
+                if (member is IMethodSymbol methodSymbol)
+                {
+                    if (!methodSymbol.IsStatic || methodSymbol.DeclaredAccessibility != Accessibility.Public)
+                    {
+                        diagnosticMessage = Diagnostics.SizeFunctionIsNotPublicStatic;
+                        continue;
+                    }
+
+                    diagnosticMessage = Diagnostics.SizeFunctionUnexpectedSignature;
+
+                    if (MethodParametersMatch(methodSymbol, ReadOnlySpanByteType, _ctxt.Compilation.GetSpecialType(SpecialType.System_Int32)) &&
+                        MethodReturnTypeMatches(methodSymbol, _ctxt.Compilation.GetSpecialType(SpecialType.System_Int32)))
+                    {
+                        // Looks good. Choose this one.
+                        // No errors.
+                        diagnosticMessage = null;
+                        positionMethod = methodSymbol;
+                    }
+                }
+            }
+
+            if (diagnosticMessage is DiagnosticDescriptor)
+            {
+                _ctxt.ReportDiagnostic(Diagnostic.Create(diagnosticMessage, diagnosticLocation, declaredName));
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool MethodParametersMatch(IMethodSymbol method, params INamedTypeSymbol[] expected)
         {
             if (method.Parameters.Length != expected.Length)
             {
@@ -421,6 +605,16 @@ namespace Enclave.FastPacket.Generator
             }
 
             return true;
+        }
+
+        private bool MethodReturnTypeMatches(IMethodSymbol method, INamedTypeSymbol returnType)
+        {
+            if (method.ReturnsVoid)
+            {
+                return false;
+            }
+
+            return SymbolEqualityComparer.Default.Equals(returnType, method.ReturnType);
         }
     }
 }

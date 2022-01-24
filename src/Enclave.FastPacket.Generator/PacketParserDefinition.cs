@@ -1,14 +1,15 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Enclave.FastPacket.Generator
 {
     internal class PacketParserDefinition
     {
-        public PacketParserDefinition(ImmutableList<IPacketProperty> propertySet)
+        public PacketParserDefinition(IList<IPacketProperty> propertySet)
         {
             PropertySet = propertySet;
         }
 
-        public ImmutableList<IPacketProperty> PropertySet { get; }
+        public IList<IPacketProperty> PropertySet { get; }
     }
 }

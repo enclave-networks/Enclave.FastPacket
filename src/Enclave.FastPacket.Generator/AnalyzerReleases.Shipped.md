@@ -16,4 +16,8 @@ FASTPACKET006 | FastPacket | Error | Diagnostics
 FASTPACKET007 | FastPacket | Error | Diagnostics
 FASTPACKET008 | FastPacket | Error | Diagnostics
 FASTPACKET009 | FastPacket | Error | Diagnostics
+FASTPACKET010 | FastPacket | Error | Diagnostics
+FASTPACKET011 | FastPacket | Error | Diagnostics
+FASTPACKET012 | FastPacket | Error | Diagnostics
+FASTPACKET013 | FastPacket | Error | Diagnostics
 FASTPACKET255 | FastPacket | Error | Diagnostics

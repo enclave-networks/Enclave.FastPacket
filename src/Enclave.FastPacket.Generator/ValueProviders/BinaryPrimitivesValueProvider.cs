@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Enclave.FastPacket.Generator
+namespace Enclave.FastPacket.Generator.ValueProviders
 {
     internal class BinaryPrimitivesValueProvider : IValueProvider
     {

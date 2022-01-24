@@ -1,7 +1,8 @@
 ﻿using System;
+using Enclave.FastPacket.Generator.ValueProviders;
 using Microsoft.CodeAnalysis;
 
-namespace Enclave.FastPacket.Generator
+namespace Enclave.FastPacket.Generator.SizeProviders
 {
     internal class CustomTypeMethodSizeProvider : ISizeProvider
     {

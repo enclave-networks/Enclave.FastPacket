@@ -110,22 +110,87 @@ namespace Enclave.FastPacket.Generator
 
         private static PacketParserDefinition CreatePacketDefinition(PacketPropertyFactory packetFieldFactory, INamedTypeSymbol defType)
         {
-            var members = defType.GetMembers().OfType<IPropertySymbol>().ToImmutableList();
-            var propertySet = ImmutableList<IPacketProperty>.Empty;
+            var propertySymbolSet = new List<(IPropertySymbol Prop, INamedTypeSymbol? UnionType)>();
+
+            var members = defType.GetMembers();
+
+            // In the first pass, we need to drill down into any union structs to extract associated properties.
+            foreach (var member in members)
+            {
+                if (member is IPropertySymbol prop)
+                {
+                    if (!prop.IsStatic)
+                    {
+                        propertySymbolSet.Add((prop, null));
+                    }
+                }
+                else if (member is INamedTypeSymbol childTypeSymbol && member is not IErrorTypeSymbol)
+                {
+                    // May be a union, need to drill in.
+                    foreach (var childMember in childTypeSymbol.GetMembers())
+                    {
+                        if (childMember is IPropertySymbol childProp && !childProp.IsStatic)
+                        {
+                            propertySymbolSet.Add((childProp, childTypeSymbol));
+                        }
+                    }
+                }
+            }
+
+            var propertySet = new List<IPacketProperty>();
 
             IPacketProperty? lastProp = null;
+            INamedTypeSymbol? currentUnion = null;
+            IPacketProperty? currentUnionProperty = null;
 
-            for (int idx = 0; idx < members.Count; idx++)
+            for (int idx = 0; idx < propertySymbolSet.Count; idx++)
             {
-                ISymbol? member = members[idx];
+                var (propSymbol, unionSymbol) = propertySymbolSet[idx];
 
-                if (member is IPropertySymbol prop &&
-                    packetFieldFactory.TryCreate(prop, lastProp, idx == members.Count - 1, out var createdProp))
+                if (SymbolEqualityComparer.Default.Equals(currentUnion, unionSymbol))
+                {
+                    if (currentUnion is not null && currentUnionProperty is null)
+                    {
+                        // Apparently had a problem creating the union, so ignore this property as well.
+                        continue;
+                    }
+                }
+                else
+                {
+                    // If the union has changed (null -> union, union -> new union, union -> null),
+                    // set the last property to the representation of that union.
+                    if (currentUnionProperty is not null)
+                    {
+                        lastProp = currentUnionProperty;
+                    }
+
+                    currentUnion = unionSymbol;
+
+                    if (unionSymbol is null)
+                    {
+                        currentUnionProperty = null;
+                    }
+                    else
+                    {
+                        if (!packetFieldFactory.TryCreateUnion(defType, unionSymbol, lastProp, out currentUnionProperty))
+                        {
+                            // If we couldn't create the union, ignore the property as well.
+                            continue;
+                        }
+                    }
+                }
+
+                if (packetFieldFactory.TryCreate(defType, propSymbol, lastProp, idx == propertySymbolSet.Count - 1, out var createdProp))
                 {
                     // Add this to render.
-                    propertySet = propertySet.Add(createdProp!);
+                    propertySet.Add(createdProp!);
 
-                    lastProp = createdProp;
+                    // If we're in a union, we don't move the last property on, so the start position stays the same
+                    // for the next property.
+                    if (currentUnionProperty is null)
+                    {
+                        lastProp = createdProp;
+                    }
                 }
             }
 
@@ -184,5 +249,10 @@ namespace Enclave.FastPacket.Generator
 
             return implSource.ReadToEnd();
         }
+    }
+
+    public class UnionOptions
+    {
+        public INamedTypeSymbol? SizeOfType { get; set; }
     }
 }

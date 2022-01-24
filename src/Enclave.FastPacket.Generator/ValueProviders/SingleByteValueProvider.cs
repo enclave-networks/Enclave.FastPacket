@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Enclave.FastPacket.Generator
+namespace Enclave.FastPacket.Generator.ValueProviders
 {
 
     internal class SingleByteValueProvider : IValueProvider

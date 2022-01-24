@@ -1,4 +1,4 @@
-﻿namespace Enclave.FastPacket.Generator
+﻿namespace Enclave.FastPacket.Generator.PositionProviders
 {
     internal class AutomaticPositionProvider : IPositionProvider
     {

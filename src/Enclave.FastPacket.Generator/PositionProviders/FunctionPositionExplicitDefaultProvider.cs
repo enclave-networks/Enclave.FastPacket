@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Globalization;
-using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis;
 
-namespace Enclave.FastPacket.Generator
+namespace Enclave.FastPacket.Generator.PositionProviders
 {
-
     internal class FunctionPositionExplicitDefaultProvider : ConstantPositionProvider
     {
         public FunctionPositionExplicitDefaultProvider(IMethodSymbol positionMethod, int explicitPosition)

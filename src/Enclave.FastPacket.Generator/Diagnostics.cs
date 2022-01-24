@@ -7,6 +7,9 @@ namespace Enclave.FastPacket.Generator
         private const string CommonPositionFunctionMessage =
             "Position functions must be public static methods in the definition type, with the following signature: `public static int {0}(ReadOnlySpan<byte> packetData, int defaultPosition)`.";
 
+        private const string CommonSizeFunctionMessage =
+            "Position functions must be public static methods in the definition type, with the following signature: `public static int {0}(ReadOnlySpan<byte> packetData, int position)`.";
+
         public static readonly DiagnosticDescriptor TypeIsNotPartial = new DiagnosticDescriptor(id: "FASTPACKET001",
                                                                                                  title: "Decorated type must be partial",
                                                                                                  messageFormat: "Decorated type {0} must be partial",
@@ -62,7 +65,7 @@ namespace Enclave.FastPacket.Generator
         public static readonly DiagnosticDescriptor SpanInMiddleOfPacketMustHaveSize = new DiagnosticDescriptor(id: "FASTPACKET008",
                                                                                                  title: "If specifying a span of bytes in the middle of a packet, you must provide a size",
                                                                                                  messageFormat: "The specified field {0} declares a variable sized block of data in the middle of a packet, so you must specify the " +
-                                                                                                                "`Size` property on `PacketFieldAttribute`",
+                                                                                                                "`Size` or `SizeFunction` property on `PacketFieldAttribute`",
                                                                                                  category: "FastPacket",
                                                                                                  DiagnosticSeverity.Error,
                                                                                                  isEnabledByDefault: true);
@@ -70,6 +73,35 @@ namespace Enclave.FastPacket.Generator
         public static readonly DiagnosticDescriptor EnumUnderlyingTypeInvalid = new DiagnosticDescriptor(id: "FASTPACKET009",
                                                                                                  title: "The specified type is not a valid backing type for an enum",
                                                                                                  messageFormat: "The field {0} indicates an enum backing type of {1}, but {1} is not a valid numeric enum backing type",
+                                                                                                 category: "FastPacket",
+                                                                                                 DiagnosticSeverity.Error,
+                                                                                                 isEnabledByDefault: true);
+
+        public static readonly DiagnosticDescriptor SizeFunctionIsNotFound = new DiagnosticDescriptor(id: "FASTPACKET010",
+                                                                                                 title: "Specified size function was not found",
+                                                                                                 messageFormat: "The specified size function {0} is not found in this class. " + CommonSizeFunctionMessage,
+                                                                                                 category: "FastPacket",
+                                                                                                 DiagnosticSeverity.Error,
+                                                                                                 isEnabledByDefault: true);
+
+        public static readonly DiagnosticDescriptor SizeFunctionIsNotPublicStatic = new DiagnosticDescriptor(id: "FASTPACKET011",
+                                                                                                 title: "Specified size function is not public static",
+                                                                                                 messageFormat: "The specified size function {0} is not public static. " + CommonSizeFunctionMessage,
+                                                                                                 category: "FastPacket",
+                                                                                                 DiagnosticSeverity.Error,
+                                                                                                 isEnabledByDefault: true);
+
+        public static readonly DiagnosticDescriptor SizeFunctionUnexpectedSignature = new DiagnosticDescriptor(id: "FASTPACKET012",
+                                                                                                 title: "Specified size function has the wrong signature",
+                                                                                                 messageFormat: "The specified size function {0} has the wrong signature. " + CommonSizeFunctionMessage,
+                                                                                                 category: "FastPacket",
+                                                                                                 DiagnosticSeverity.Error,
+                                                                                                 isEnabledByDefault: true);
+
+
+        public static readonly DiagnosticDescriptor UnionsShouldHaveDeclaredSize = new DiagnosticDescriptor(id: "FASTPACKET013",
+                                                                                                 title: "Union structures in packets should declare a size using the PacketField attribute",
+                                                                                                 messageFormat: "The union structure {0} must declare a size with either the 'Size' or 'SizeFunction' properties of a PacketFieldAttribute on the attached to the structure",
                                                                                                  category: "FastPacket",
                                                                                                  DiagnosticSeverity.Error,
                                                                                                  isEnabledByDefault: true);
