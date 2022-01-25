@@ -1,17 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageId>Enclave.FastPacket</PackageId>
-    <Version>1.0.0</Version>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/enclave-networks/Enclave.FastPacket</RepositoryUrl>
-    <Authors>Enclave Networks</Authors>
-    <Company>Enclave Networks</Company>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <PackageId>Enclave.FastPacket</PackageId>
+        <Version>1.0.0</Version>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/enclave-networks/Enclave.FastPacket</RepositoryUrl>
+        <Authors>Enclave Networks</Authors>
+        <Company>Enclave Networks</Company>
+    </PropertyGroup>
 
+    <!-- Output source generator files to disk -->
+    <PropertyGroup>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <GeneratedFolder>Generated</GeneratedFolder>
+        <CompilerGeneratedFilesOutputPath>$(GeneratedFolder)\$(TargetFramework)</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Exclude everything in the base folder -->
+        <Compile Remove="$(GeneratedFolder)/**/*.cs" />
+    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="../Enclave.FastPacket.Generator/Enclave.FastPacket.Generator.csproj"
