@@ -307,7 +307,7 @@ struct MyPacketDefinition
 }
 
 [PacketImplementation(typeof(MyPacketDefinition), IsReadOnly = true)]
-readonly ref partial MyPacket struct
+readonly ref partial struct MyPacket
 {
 }
 ```
