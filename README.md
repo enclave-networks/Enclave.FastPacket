@@ -161,7 +161,7 @@ rather than the `ByteArraySegment` approach used in PacketDotNet.
 This then spun out into wanting a standard way to define packet structures, so the source generator was born, and decided it was useful enough to others
 to open-source.
 
-# Source Generator Features
+## Source Generator Features
 
 The FastPacket Source Generator gives us a number of features that make it easier to define packet structures.
 
@@ -217,7 +217,7 @@ The generated properties are like so:
 
 Wherever possible, we use constant computation to determine the position of fields in packets.
 
-## ReadOnly Implementations
+### ReadOnly Implementations
 
 You often may not have a writeable `Span<byte>` containing packet data, or you may want to prevent editing of packet fields.
 
@@ -254,7 +254,7 @@ This lets you do things like:
 - Change the 'actual' size of a field.
 - Change the computed position of a field.
 
-## Blob Fields
+### Blob Fields
 
 You often want a field of data in a packet that represents a blob of data in some form.
 
