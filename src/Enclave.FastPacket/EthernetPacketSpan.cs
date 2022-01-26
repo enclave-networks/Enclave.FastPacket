@@ -30,3 +30,8 @@ internal ref struct EthernetPacketDefinition
 public readonly ref partial struct EthernetPacketSpan
 {
 }
+
+[PacketImplementation(typeof(EthernetPacketDefinition), IsReadOnly = true)]
+public readonly ref partial struct EthernetPacketReadOnlySpan
+{
+}

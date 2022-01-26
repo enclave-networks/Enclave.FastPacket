@@ -47,10 +47,10 @@ internal ref struct Ipv4Definition
 
     public ushort HeaderChecksum { get; set; }
 
-    [PacketField(Size = 4)]
+    [PacketField(Size = ValueIpAddress.Ipv4Length)]
     public ValueIpAddress Source { get; set; }
 
-    [PacketField(Size = 4)]
+    [PacketField(Size = ValueIpAddress.Ipv4Length)]
     public ValueIpAddress Destination { get; set; }
 
     [PacketField(SizeFunction = nameof(GetOptionsSize))]

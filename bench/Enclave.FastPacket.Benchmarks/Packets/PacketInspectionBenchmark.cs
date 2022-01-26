@@ -38,7 +38,7 @@ public class PacketInspectionBenchmark
     }
 
     [Benchmark]
-    public void InspectPacketDotNet()
+    public void EthernetPacketGetUdpPorts_PacketDotNet()
     {
         var byteArraySegment = new PacketDotNet.Utils.ByteArraySegment(_packetContent);
 
@@ -66,17 +66,17 @@ public class PacketInspectionBenchmark
     }
 
     [Benchmark]
-    public void InspectFastPacket()
+    public void EthernetPacketGetUdpPorts_FastPacket()
     {
         var ethernetPacket = new EthernetPacketSpan(_packetContent);
 
         if (ethernetPacket.Type == EthernetType.IPv4)
         {
-            var ipPacket = new Ipv4(ethernetPacket.Payload);
+            var ipPacket = new Ipv4PacketReadOnlySpan(ethernetPacket.Payload);
 
             if (ipPacket.Protocol == System.Net.Sockets.ProtocolType.Udp)
             {
-                var udpPacket = new Udp(ipPacket.Payload);
+                var udpPacket = new UdpPacketReadOnlySpan(ipPacket.Payload);
 
                 var srcPort = udpPacket.SourcePort;
                 var dstPort = udpPacket.DestinationPort;
@@ -84,64 +84,6 @@ public class PacketInspectionBenchmark
                 if (srcPort != 1024 || dstPort != 63000)
                 {
                     throw new InvalidOperationException("bad ports");
-                }
-            }
-        }
-    }
-
-    [Benchmark]
-    public void InspectPacketDotNetRepeatedAccess()
-    {
-        var byteArraySegment = new PacketDotNet.Utils.ByteArraySegment(_packetContent);
-
-        var ethernetPacket = new PacketDotNet.EthernetPacket(byteArraySegment);
-
-        if (ethernetPacket.Type == PacketDotNet.EthernetType.IPv4)
-        {
-            var ipPacket = ethernetPacket.Extract<IPPacket>();
-
-            var protocol = ipPacket.Protocol;
-
-            if (protocol == ProtocolType.Udp)
-            {
-                var udpPacket = ipPacket.Extract<PacketDotNet.UdpPacket>();
-
-                foreach (var i in Enumerable.Range(0, 1000))
-                {
-                    var srcPort = udpPacket.SourcePort;
-                    var dstPort = udpPacket.DestinationPort;
-
-                    if (srcPort != 1024 || dstPort != 63000)
-                    {
-                        throw new InvalidOperationException("bad ports");
-                    }
-                }
-            }
-        }
-    }
-
-    [Benchmark]
-    public void InspectFastPacketRepeatedAccess()
-    {
-        var ethernetPacket = new EthernetPacketSpan(_packetContent);
-
-        if (ethernetPacket.Type == EthernetType.IPv4)
-        {
-            var ipPacket = new Ipv4(ethernetPacket.Payload);
-
-            if (ipPacket.Protocol == System.Net.Sockets.ProtocolType.Udp)
-            {
-                var udpPacket = new Udp(ipPacket.Payload);
-
-                foreach (var i in Enumerable.Range(0, 1000))
-                {
-                    var srcPort = udpPacket.SourcePort;
-                    var dstPort = udpPacket.DestinationPort;
-
-                    if (srcPort != 1024 || dstPort != 63000)
-                    {
-                        throw new InvalidOperationException("bad ports");
-                    }
                 }
             }
         }

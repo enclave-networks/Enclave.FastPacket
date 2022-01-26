@@ -25,10 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Enclave.FastPacket.Generator/Enclave.FastPacket.Generator.csproj"
-                          OutputItemType="Analyzer"
-                          PrivateAssets="all"
-                          ReferenceOutputAssembly="false">
+        <ProjectReference Include="../Enclave.FastPacket.Generator/Enclave.FastPacket.Generator.csproj" OutputItemType="Analyzer" PrivateAssets="all" ReferenceOutputAssembly="false">
         </ProjectReference>
     </ItemGroup>
 
