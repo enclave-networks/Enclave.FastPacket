@@ -1,10 +1,5 @@
 ﻿using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Enclave.FastPacket.Tests;
 
@@ -18,8 +13,6 @@ public class EthernetTests
         var ethPacketSpan = new EthernetPacketSpan(bytes);
 
         var type = ethPacketSpan.Type;
-
-        ethPacketSpan.Type = EthernetType.IPv6;
 
         Assert.AreEqual(EthernetType.IPv4, type);
     }

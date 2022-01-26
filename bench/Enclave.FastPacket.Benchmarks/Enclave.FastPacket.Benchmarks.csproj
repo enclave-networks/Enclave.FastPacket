@@ -14,4 +14,10 @@
     <ProjectReference Include="..\..\src\Enclave.FastPacket\Enclave.FastPacket.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Examples\mongodb-ssh-tcp-packet.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
