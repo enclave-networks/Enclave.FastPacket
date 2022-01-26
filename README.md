@@ -149,6 +149,9 @@ will populate the rest of the `EthernetPacketSpan` type:
 At build time, the C# compiler will collapse all those constant values in the generated type into a single constant value as efficiently as it possibly
 can, so the eventual IL ASM after the JIT has run is very efficient (and largely inlined).
 
+All of the generated code for the `Enclave.FastPacket` library is currently checked in to git
+[here](https://github.com/enclave-networks/Enclave.FastPacket/tree/main/src/Enclave.FastPacket/Generated/net6.0/Enclave.FastPacket.Generator/Enclave.FastPacket.Generator.PacketParserGenerator).
+
 ## History
 
 For some time in Enclave, we were using the excellent [PacketDotNet](https://github.com/dotpcap/packetnet) library to analyse ethernet packets "on the wire" as they were moving through a
