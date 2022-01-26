@@ -95,7 +95,7 @@ public readonly ref partial struct EthernetPacketSpan
 }
 ```
 
-will populate the reset of the `EthernetPacketSpan` type:
+will populate the rest of the `EthernetPacketSpan` type:
 
 ```csharp 
  readonly ref partial struct EthernetPacketSpan
@@ -195,7 +195,8 @@ struct MyPacketDefinition
 ```
 
 The generated properties are like so:
-```
+
+```csharp
     public byte Field1
     {
         get => _span[0];
