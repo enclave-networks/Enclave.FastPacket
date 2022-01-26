@@ -19,6 +19,18 @@ We aim for the highest-possible performance, trying to remove the cost of readin
 We also want to simplify defining packets, by allowing us to base how we lay out packets on the way RFCs and documentation represent them, rather than
 how C# code typically requires it.
 
+## History
+
+For some time in Enclave, we were using the excellent [PacketDotNet](https://github.com/dotpcap/packetnet) library to analyse ethernet packets "on the wire" as they were moving through a
+network adapter, but we saw that the number of memory allocations and overhead of reading packets with PacketDotNet was causing some slow downs
+when we needed to analyse "some" of the content of every packet.
+
+So, we started a small, hand-rolled library internally to read individual fields of packets directly using `ReadOnlySpan<byte>`,
+rather than the `ByteArraySegment` approach used in PacketDotNet.
+
+This then spun out into wanting a standard way to define packet structures, so the source generator was born, and decided it was useful enough to others
+to open-source.
+
 ## Benchmarks
 
 Here's an output of some of our benchmarks that compare the (aforementioned excellent) PacketDotNet library with FastPacket for parsing some
@@ -151,18 +163,6 @@ can, so the eventual IL ASM after the JIT has run is very efficient (and largely
 
 All of the generated code for the `Enclave.FastPacket` library is currently checked in to git
 [here](https://github.com/enclave-networks/Enclave.FastPacket/tree/main/src/Enclave.FastPacket/Generated/net6.0/Enclave.FastPacket.Generator/Enclave.FastPacket.Generator.PacketParserGenerator).
-
-## History
-
-For some time in Enclave, we were using the excellent [PacketDotNet](https://github.com/dotpcap/packetnet) library to analyse ethernet packets "on the wire" as they were moving through a
-network adapter, but we saw that the number of memory allocations and overhead of reading packets with PacketDotNet was causing some slow downs
-when we needed to analyse "some" of the content of every packet.
-
-So, we started a small, hand-rolled library internally to read individual fields of packets directly using `ReadOnlySpan<byte>`,
-rather than the `ByteArraySegment` approach used in PacketDotNet.
-
-This then spun out into wanting a standard way to define packet structures, so the source generator was born, and decided it was useful enough to others
-to open-source.
 
 ## Source Generator Features
 
