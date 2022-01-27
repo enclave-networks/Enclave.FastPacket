@@ -1,0 +1,48 @@
+name: SDK API Build
+
+on:
+  push:
+    branches: [ develop, main ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0.9.7
+      with:
+        versionSpec: '5.x'
+
+    - name: Determine Version
+      id:   gitversion
+      uses: gittools/actions/gitversion/execute@v0.9.7
+              
+    - name: Setup .NET 6 (SDK)
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+                
+    - name: Unit Tests
+      run: dotnet test
+
+    - name: Build
+      run: dotnet build -c Release /p:Version=${{ steps.gitversion.outputs.SemVer }}
+      
+    - name: Create Release    
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.gitversion.outputs.SemVer }}
+        release_name: Release v${{ steps.gitversion.outputs.SemVer }}
+        body: Latest Enclave.FastPacket Release

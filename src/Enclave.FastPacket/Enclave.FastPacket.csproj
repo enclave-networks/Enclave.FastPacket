@@ -8,9 +8,24 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/enclave-networks/Enclave.FastPacket</RepositoryUrl>
-        <Authors>Enclave Networks</Authors>
-        <Company>Enclave Networks</Company>
     </PropertyGroup>
+    
+    <PropertyGroup>
+        <Authors>Enclave Networks</Authors>
+        <Description>A set of high-performance Ethernet and IP frame decoders.</Description>
+        <Copyright>Enclave Networks 2022</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/enclave-networks/Enclave.FastPacket</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/enclave-networks/Enclave.FastPacket</RepositoryUrl>
+        <RepositoryType>GitHub</RepositoryType>
+        <PackageTags>generator</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Package the generator in the analyzer directory of the nuget package -->
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 
     <!-- Output source generator files to disk -->
     <PropertyGroup>

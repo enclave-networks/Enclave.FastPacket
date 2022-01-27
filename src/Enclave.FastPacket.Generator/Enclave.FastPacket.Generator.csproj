@@ -19,7 +19,7 @@
 
     <PropertyGroup>
         <Authors>Enclave Networks</Authors>
-        <Description>Generate fast packet parsers from a packet description..</Description>
+        <Description>Generate fast packet decoders from a packet description..</Description>
         <Copyright>Enclave Networks 2022</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/enclave-networks/Enclave.FastPacket</PackageProjectUrl>
