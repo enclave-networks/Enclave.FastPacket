@@ -19,7 +19,7 @@ public class UnionTests
     [Fact]
     public Task CanGenerateUnion()
     {
-        var inputCompilation = CompilationVerifier.Create(@"
+        return CompilationVerifier.Verify(@"
 
 using Enclave.FastPacket.Generator;
 
@@ -46,20 +46,12 @@ namespace T
     }
 }
             ");
-
-        var generator = new PacketParserGenerator();
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-
-        return Verify(driver);
     }
 
     [Fact]
     public Task CanGenerateUnionWithBitmask()
     {
-        var inputCompilation = CompilationVerifier.Create(@"
+        return CompilationVerifier.Verify(@"
 
 using Enclave.FastPacket.Generator;
 
@@ -88,20 +80,12 @@ namespace T
     }
 }
             ");
-
-        var generator = new PacketParserGenerator();
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-
-        return Verify(driver);
     }
 
     [Fact]
     public Task CanGenerateUnionWithLargeBitmask()
     {
-        var inputCompilation = CompilationVerifier.Create(@"
+        return CompilationVerifier.Verify(@"
 
 using Enclave.FastPacket.Generator;
 
@@ -118,25 +102,12 @@ namespace T
     {
         ushort Value { get; set; }
 
-        [PacketField(Size = sizeof(byte))]
-        private struct U1
-        {
-            [PacketFieldBits(0, 3)]
-            public byte Version { get; set; }
-
-            [PacketFieldBits(4, 7)]
-            public byte IHL { get; set; }
-        }
-
         [PacketField(Size = sizeof(ushort))]
         private struct U3
         {
             [PacketFieldBits(0, 2)]
             public FragmentFlags Flags { get; set; }
 
-            /// <summary>
-            /// Can specify the bitmask by inverting the other one.
-            /// </summary>
             [PacketFieldBits(3, 15)]
             public ushort FragmentValue { get; set; }
         }
@@ -150,13 +121,5 @@ namespace T
     }
 }
             ");
-
-        var generator = new PacketParserGenerator();
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-
-        return Verify(driver);
     }
 }

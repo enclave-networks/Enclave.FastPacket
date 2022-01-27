@@ -14,7 +14,7 @@ public class SizeFunctionTests
     [Fact]
     public Task CanHaveOptionalPosition()
     {
-        var inputCompilation = CompilationVerifier.Create(@"
+        return CompilationVerifier.Verify(@"
 using System;
 using Enclave.FastPacket.Generator;
 
@@ -47,13 +47,5 @@ namespace T
     }
 }
             ");
-
-        var generator = new PacketParserGenerator();
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-
-        return Verify(driver);
     }
 }

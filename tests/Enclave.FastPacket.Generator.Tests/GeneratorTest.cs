@@ -1,10 +1,4 @@
 using Enclave.FastPacket.Generator.Tests.Helpers;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using System.Reflection;
-using System.Threading.Tasks;
-using VerifyXunit;
-using Xunit;
 
 namespace Enclave.FastPacket.Generator.Tests;
 
@@ -14,37 +8,27 @@ public class GeneratorTest
     [Fact]
     public Task CanGenerateDefaultType()
     {
-        var inputCompilation = CompilationVerifier.Create(@"
+        return CompilationVerifier.Verify(@"
+            using Enclave.FastPacket.Generator;
 
-using Enclave.FastPacket.Generator;
+            namespace T
+            {
+                internal interface IPacketDefinition
+                {
+                    ushort Value { get; set; }
+                }
 
-namespace T
-{
-    internal interface IPacketDefinition
-    {
-        ushort Value { get; set; }
-    }
-
-    [PacketImplementation(typeof(IPacketDefinition))]
-    public readonly ref partial struct ValueItem
-    {   
-    }
-}
-            ");
-
-        var generator = new PacketParserGenerator();
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-
-        return Verify(driver);
+                [PacketImplementation(typeof(IPacketDefinition))]
+                public readonly ref partial struct ValueItem
+                {   
+                }
+            }");
     }
 
     [Fact]
     public Task CanGenerateTypeWithPositionFunction()
     {
-        var inputCompilation = CompilationVerifier.Create(@"
+        return CompilationVerifier.Verify(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -71,21 +55,13 @@ namespace T
     }
 }
             ");
-
-        var generator = new PacketParserGenerator();
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-
-        return Verify(driver);
     }
 
 
     [Fact]
     public Task CanGenerateTypeWithEnumValue()
     {
-        var inputCompilation = CompilationVerifier.Create(@"
+        return CompilationVerifier.Verify(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -110,20 +86,12 @@ namespace T
     }
 }
             ");
-
-        var generator = new PacketParserGenerator();
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-
-        return Verify(driver);
     }
 
     [Fact]
     public Task CanGenerateTypeWithEnumCustomBackingTypeValue()
     {
-        var inputCompilation = CompilationVerifier.Create(@"
+        return CompilationVerifier.Verify(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -148,21 +116,13 @@ namespace T
     }
 }
             ");
-
-        var generator = new PacketParserGenerator();
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-
-        return Verify(driver);
     }
 
 
     [Fact]
     public Task CanGenerateTypeWithCustomTypeSizeConstant()
     {
-        var inputCompilation = CompilationVerifier.Create(@"
+        return CompilationVerifier.Verify(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -203,20 +163,12 @@ namespace T
     }
 }
             ");
-
-        var generator = new PacketParserGenerator();
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-
-        return Verify(driver);
     }
 
     [Fact]
     public Task CanGenerateTypeWithExternalSize()
     {
-        var inputCompilation = CompilationVerifier.Create(@"
+        return CompilationVerifier.Verify(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -257,20 +209,12 @@ namespace T
     }
 }
             ");
-
-        var generator = new PacketParserGenerator();
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-
-        return Verify(driver);
     }
 
     [Fact]
     public Task CanGenerateTypeWithPayload()
     {
-        var inputCompilation = CompilationVerifier.Create(@"
+        return CompilationVerifier.Verify(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -290,20 +234,12 @@ namespace T
     }
 }
             ");
-
-        var generator = new PacketParserGenerator();
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-
-        return Verify(driver);
     }
 
     [Fact]
     public Task CanGenerateTypeWithLongerNamespace()
     {
-        var inputCompilation = CompilationVerifier.Create(@"
+        return CompilationVerifier.Verify(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -321,13 +257,5 @@ namespace Enclave.FastPacket
     }
 }
             ");
-
-        var generator = new PacketParserGenerator();
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-
-        return Verify(driver);
     }
 }

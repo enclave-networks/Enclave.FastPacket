@@ -42,8 +42,7 @@ internal static class SymbolNameExtensions
     {
         var st = ImmutableStack<string>.Empty;
 
-        st.Push("_Generated.cs");
-        st = st.Push(symbol.Name);
+        st = st.Push(symbol.Name + "_Generated.cs");
 
         ISymbol? currentSymbol = symbol.ContainingType ?? (ISymbol?)symbol.ContainingNamespace;
 
