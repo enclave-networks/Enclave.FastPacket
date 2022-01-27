@@ -1,8 +1,4 @@
 ﻿using FluentAssertions;
-using PacketDotNet.Utils;
-using System;
-using System.IO;
-using System.Net.Sockets;
 using Xunit;
 
 namespace Enclave.FastPacket.Tests;
@@ -25,7 +21,7 @@ public class RealPacketTests
 
         ipSpan.Source.ToString().Should().Be("100.73.154.85");
         ipSpan.Destination.ToString().Should().Be("100.83.102.174");
-        ipSpan.Protocol.Should().Be(ProtocolType.Tcp);
+        ipSpan.Protocol.Should().Be(IpProtocol.Tcp);
 
         var tcpSpan = new TcpPacketReadOnlySpan(ipSpan.Payload);
 

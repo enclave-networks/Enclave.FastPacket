@@ -85,7 +85,7 @@ public class PacketInspectionBenchmark
         {
             var ipPacket = new Ipv4PacketReadOnlySpan(ethernetPacket.Payload);
 
-            if (ipPacket.Protocol == System.Net.Sockets.ProtocolType.Udp)
+            if (ipPacket.Protocol == IpProtocol.Udp)
             {
                 var udpPacket = new UdpPacketReadOnlySpan(ipPacket.Payload);
 
@@ -137,7 +137,7 @@ public class PacketInspectionBenchmark
         {
             var ipPacket = new Ipv4PacketReadOnlySpan(ethernetPacket.Payload);
 
-            if (ipPacket.Protocol == System.Net.Sockets.ProtocolType.Tcp)
+            if (ipPacket.Protocol == IpProtocol.Tcp)
             {
                 var tcpPacket = new TcpPacketReadOnlySpan(ipPacket.Payload);
 
@@ -189,7 +189,7 @@ public class PacketInspectionBenchmark
         {
             var ipPacket = new Ipv4PacketReadOnlySpan(ethernetPacket.Payload);
 
-            if (ipPacket.Protocol == System.Net.Sockets.ProtocolType.Tcp)
+            if (ipPacket.Protocol == IpProtocol.Tcp)
             {
                 var tcpPacket = new TcpPacketReadOnlySpan(ipPacket.Payload);
 
@@ -237,7 +237,7 @@ public class PacketInspectionBenchmark
         {
             var ipPacket = new Ipv4PacketReadOnlySpan(ethernetPacket.Payload);
 
-            if (ipPacket.Protocol == System.Net.Sockets.ProtocolType.Tcp)
+            if (ipPacket.Protocol == IpProtocol.Tcp)
             {
                 var tcpPacket = new TcpPacketReadOnlySpan(ipPacket.Payload);
 

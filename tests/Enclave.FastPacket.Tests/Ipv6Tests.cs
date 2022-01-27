@@ -28,7 +28,7 @@ public class Ipv6Tests
 
         var myIp = new Ipv6PacketSpan(packetData);
 
-        myIp.NextHeader.Should().Be(System.Net.Sockets.ProtocolType.Udp);
+        myIp.NextHeader.Should().Be(IpProtocol.Udp);
         myIp.Source.ToIpAddress().Should().Be(sourceIp);
         myIp.Destination.ToIpAddress().Should().Be(destIp);
 
@@ -56,7 +56,7 @@ public class Ipv6Tests
 
         var myIp = new Ipv6PacketSpan(packetData);
 
-        myIp.NextHeader.Should().Be(System.Net.Sockets.ProtocolType.Tcp);
+        myIp.NextHeader.Should().Be(IpProtocol.Tcp);
         myIp.Source.ToIpAddress().Should().Be(sourceIp);
         myIp.Destination.ToIpAddress().Should().Be(destIp);
 

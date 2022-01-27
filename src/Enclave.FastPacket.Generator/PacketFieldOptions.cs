@@ -2,7 +2,7 @@
 
 namespace Enclave.FastPacket.Generator;
 
-public struct PacketFieldOptions
+public class PacketFieldOptions
 {
     public int? Size { get; set; }
 

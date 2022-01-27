@@ -64,7 +64,7 @@ public class PacketParserGenerator : ISourceGenerator
 
             var structSymbol = semanticModel.GetDeclaredSymbol(node);
 
-            if (!trackSeenTypes.Add(structSymbol))
+            if (structSymbol is null || !trackSeenTypes.Add(structSymbol))
             {
                 // Seen already - duplicate attribute usage warning is going to show up.
                 continue;
@@ -236,7 +236,7 @@ public class PacketParserGenerator : ISourceGenerator
         return new PacketParserDefinition(propertySet, minSizeExpression);
     }
 
-    private bool ValidateType(GeneratorExecutionContext context, GenerationOptions options, StructDeclarationSyntax owner, INamedTypeSymbol symbol)
+    private static bool ValidateType(GeneratorExecutionContext context, GenerationOptions options, StructDeclarationSyntax owner, INamedTypeSymbol symbol)
     {
         if (!owner.Modifiers.Any(SyntaxKind.PartialKeyword))
         {
@@ -266,7 +266,6 @@ public class PacketParserGenerator : ISourceGenerator
         {
             var node = context.Node;
 
-            // Whenever we see an implementation attribute, we define 
             if (context.Node is AttributeSyntax attrib &&
                 context.SemanticModel.GetTypeInfo(attrib).Type?.ToDisplayString() == "Enclave.FastPacket.Generator.PacketImplementationAttribute")
             {

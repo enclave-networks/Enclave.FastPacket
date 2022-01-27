@@ -45,18 +45,18 @@ Intel Core i7-9750H CPU 2.60GHz, 1 CPU, 12 logical and 6 physical cores
   [Host]     : .NET Core 6.0.1 (CoreCLR 6.0.121.56705, CoreFX 6.0.121.56705), X64 RyuJIT
   DefaultJob : .NET Core 6.0.1 (CoreCLR 6.0.121.56705, CoreFX 6.0.121.56705), X64 RyuJIT  
 
-|                                  Method |      Mean |    Error |   StdDev |  Gen 0 |  Gen 1 | Gen 2 | Allocated |
-|---------------------------------------- |----------:|---------:|---------:|-------:|-------:|------:|----------:|
-| GetEthernetHardwareAddress_PacketDotNet |  45.14 ns | 0.654 ns | 0.611 ns | 0.0523 |      - |     - |     328 B |
-|   GetEthernetHardwareAddress_FastPacket |  10.05 ns | 0.135 ns | 0.126 ns |      - |      - |     - |         - |
-|                GetUdpPorts_PacketDotNet | 216.20 ns | 4.270 ns | 4.746 ns | 0.1428 | 0.0002 |     - |     896 B |
-|                  GetUdpPorts_FastPacket |  13.14 ns | 0.194 ns | 0.181 ns |      - |      - |     - |         - |
-|                GetTcpPorts_PacketDotNet | 194.48 ns | 3.679 ns | 3.778 ns | 0.1376 | 0.0002 |     - |     864 B |
-|                  GetTcpPorts_FastPacket |  13.25 ns | 0.199 ns | 0.166 ns |      - |      - |     - |         - |
-|          GetTcpPayloadSize_PacketDotNet | 226.71 ns | 2.318 ns | 2.055 ns | 0.1490 | 0.0002 |     - |     936 B |
-|            GetTcpPayloadSize_FastPacket |  18.63 ns | 0.218 ns | 0.194 ns |      - |      - |     - |         - |
-|             CheckForTcpAck_PacketDotNet | 192.36 ns | 3.523 ns | 5.053 ns | 0.1376 | 0.0002 |     - |     864 B |
-|               CheckForTcpAck_FastPacket |  12.54 ns | 0.065 ns | 0.055 ns |      - |      - |     - |         - |
+|                                  Method |       Mean |     Error |    StdDev |  Gen 0 |  Gen 1 | Allocated |
+|---------------------------------------- |-----------:|----------:|----------:|-------:|-------:|----------:|
+| GetEthernetHardwareAddress_PacketDotNet |  45.019 ns | 0.6650 ns | 0.5553 ns | 0.0523 |      - |     328 B |
+|   GetEthernetHardwareAddress_FastPacket |   9.838 ns | 0.1141 ns | 0.0953 ns |      - |      - |         - |
+|                GetUdpPorts_PacketDotNet | 188.075 ns | 3.3844 ns | 3.0002 ns | 0.1376 | 0.0002 |     864 B |
+|                  GetUdpPorts_FastPacket |  12.991 ns | 0.1173 ns | 0.1040 ns |      - |      - |         - |
+|                GetTcpPorts_PacketDotNet | 190.251 ns | 3.7058 ns | 5.3147 ns | 0.1376 | 0.0002 |     864 B |
+|                  GetTcpPorts_FastPacket |  13.006 ns | 0.1548 ns | 0.1448 ns |      - |      - |         - |
+|          GetTcpPayloadSize_PacketDotNet | 221.873 ns | 4.4573 ns | 4.5773 ns | 0.1490 | 0.0002 |     936 B |
+|            GetTcpPayloadSize_FastPacket |  18.953 ns | 0.1827 ns | 0.1620 ns |      - |      - |         - |
+|             CheckForTcpAck_PacketDotNet | 196.111 ns | 3.9409 ns | 7.9608 ns | 0.1376 | 0.0002 |     864 B |
+|               CheckForTcpAck_FastPacket |  12.772 ns | 0.1702 ns | 0.1421 ns |      - |      - |         - |
 ```
 
 # How It Works

@@ -24,6 +24,9 @@ namespace Enclave.FastPacket
 
         
         
+        /// <summary>
+        /// The source port number.
+        /// </summary>
         public ushort SourcePort
         {
            get => BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0));
@@ -31,6 +34,9 @@ namespace Enclave.FastPacket
         }
         
         
+        /// <summary>
+        /// The destination port number.
+        /// </summary>
         public ushort DestinationPort
         {
            get => BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0 + sizeof(ushort)));
@@ -38,6 +44,9 @@ namespace Enclave.FastPacket
         }
         
         
+        /// <summary>
+        /// The sequence number.
+        /// </summary>
         public uint SequenceNumber
         {
            get => BinaryPrimitives.ReadUInt32BigEndian(_span.Slice(0 + sizeof(ushort) + sizeof(ushort)));
@@ -45,6 +54,9 @@ namespace Enclave.FastPacket
         }
         
         
+        /// <summary>
+        /// The next sequence number the sender is expecting.
+        /// </summary>
         public uint AckNumber
         {
            get => BinaryPrimitives.ReadUInt32BigEndian(_span.Slice(0 + sizeof(ushort) + sizeof(ushort) + sizeof(uint)));
@@ -52,6 +64,9 @@ namespace Enclave.FastPacket
         }
         
         
+        /// <summary>
+        /// The size of the TCP header in 32-bit words. (min 5).
+        /// </summary>
         public byte DataOffset
         {
            get => (byte)((_span[0 + sizeof(ushort) + sizeof(ushort) + sizeof(uint) + sizeof(uint)] & 0xF0u) >> 4);
@@ -59,6 +74,9 @@ namespace Enclave.FastPacket
         }
         
         
+        /// <summary>
+        /// The TCP flags.
+        /// </summary>
         public Enclave.FastPacket.TcpFlags Flags
         {
            get => (Enclave.FastPacket.TcpFlags)((ushort)(BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0 + sizeof(ushort) + sizeof(ushort) + sizeof(uint) + sizeof(uint))) & 0xFFFu));
@@ -66,6 +84,9 @@ namespace Enclave.FastPacket
         }
         
         
+        /// <summary>
+        /// The size of the receive window.
+        /// </summary>
         public ushort WindowSize
         {
            get => BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0 + sizeof(ushort) + sizeof(ushort) + sizeof(uint) + sizeof(uint) + 2));
@@ -73,6 +94,9 @@ namespace Enclave.FastPacket
         }
         
         
+        /// <summary>
+        /// The TCP header checksum.
+        /// </summary>
         public ushort Checksum
         {
            get => BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0 + sizeof(ushort) + sizeof(ushort) + sizeof(uint) + sizeof(uint) + 2 + sizeof(ushort)));
@@ -80,6 +104,9 @@ namespace Enclave.FastPacket
         }
         
         
+        /// <summary>
+        /// If the urgent flag is set, this is an offset from the sequence number indicating the last urgent byte.
+        /// </summary>
         public ushort UrgentPointer
         {
            get => BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0 + sizeof(ushort) + sizeof(ushort) + sizeof(uint) + sizeof(uint) + 2 + sizeof(ushort) + sizeof(ushort)));
@@ -87,12 +114,18 @@ namespace Enclave.FastPacket
         }
         
         
+        /// <summary>
+        /// The options block.
+        /// </summary>
         public System.Span<byte> Options
         {
            get => _span.Slice(0 + sizeof(ushort) + sizeof(ushort) + sizeof(uint) + sizeof(uint) + 2 + sizeof(ushort) + sizeof(ushort) + sizeof(ushort), Enclave.FastPacket.TcpPacketDefinition.GetOptionSize(_span));
         }
         
         
+        /// <summary>
+        /// The payload.
+        /// </summary>
         public System.Span<byte> Payload
         {
            get => _span.Slice(0 + sizeof(ushort) + sizeof(ushort) + sizeof(uint) + sizeof(uint) + 2 + sizeof(ushort) + sizeof(ushort) + sizeof(ushort) + Enclave.FastPacket.TcpPacketDefinition.GetOptionSize(_span));

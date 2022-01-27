@@ -38,7 +38,6 @@ public static class Diagnostics
                                                                                              DiagnosticSeverity.Error,
                                                                                              isEnabledByDefault: true);
 
-
     public static readonly DiagnosticDescriptor CustomFieldTypeNoConstructor = new DiagnosticDescriptor(id: "FASTPACKET005",
                                                                                              title: "Custom field type has no suitable constructor",
                                                                                              messageFormat: "The specified custom field type {0} does not have a suitable constructor; expecting `public {0}(ReadOnlySpan<byte> contents)`",
@@ -97,7 +96,6 @@ public static class Diagnostics
                                                                                              category: "FastPacket",
                                                                                              DiagnosticSeverity.Error,
                                                                                              isEnabledByDefault: true);
-
 
     public static readonly DiagnosticDescriptor UnionsShouldHaveDeclaredSize = new DiagnosticDescriptor(id: "FASTPACKET013",
                                                                                              title: "Union structures in packets should declare a size using the PacketField attribute",

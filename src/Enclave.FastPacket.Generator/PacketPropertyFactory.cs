@@ -120,7 +120,7 @@ internal class PacketPropertyFactory
             {
                 // The actual 'thing' we use is going to be based on the position of the last bits of the
                 // bitmask.
-                var lastBit = 63 - BitMaskHelpers.LeadingZeroCount(options.Bitmask.Value);
+                var lastBit = 63 - BitmaskHelpers.LeadingZeroCount(options.Bitmask.Value);
 
                 if (lastBit < 8)
                 {
@@ -153,7 +153,7 @@ internal class PacketPropertyFactory
 
                 if (options.Bitmask.HasValue)
                 {
-                    valueProvider = new BitmaskWrapperValueProvider(options.Bitmask.Value, valueProvider, sizeProvider);
+                    valueProvider = new BitmaskWrapperValueProvider(options.Bitmask.Value, valueProvider);
                 }
 
                 if (!SymbolEqualityComparer.Default.Equals(readType, propType))
@@ -183,7 +183,7 @@ internal class PacketPropertyFactory
 
                     if (options.Bitmask.HasValue)
                     {
-                        enumValueProvider = new BitmaskWrapperValueProvider(options.Bitmask.Value, enumValueProvider, sizeProvider);
+                        enumValueProvider = new BitmaskWrapperValueProvider(options.Bitmask.Value, enumValueProvider);
                     }
 
                     valueProvider = new CastingValueProvider(propType, enumValueProvider);
@@ -324,7 +324,7 @@ internal class PacketPropertyFactory
 
     private static PacketFieldOptions GetPacketFieldOptions(ISymbol owningSymbol, ref Location configurationLocation)
     {
-        PacketFieldOptions options = default;
+        var options = new PacketFieldOptions();
 
         var packetFieldAttr = owningSymbol.GetAttributes().FirstOrDefault(x =>
             x.AttributeClass is INamedTypeSymbol symbol &&

@@ -150,3 +150,12 @@ dotnet_diagnostic.SA1515.severity = none
 # CA1716: Identifiers should not match keywords
 dotnet_diagnostic.CA1716.severity = none
 csharp_style_namespace_declarations=file_scoped:warning
+
+# SA1202: Elements should be ordered by access
+dotnet_diagnostic.SA1202.severity = silent
+
+# SA1118: Parameter should not span multiple lines
+dotnet_diagnostic.SA1118.severity = silent
+
+# CA1700: Do not name enum values 'Reserved'
+dotnet_diagnostic.CA1700.severity = silent

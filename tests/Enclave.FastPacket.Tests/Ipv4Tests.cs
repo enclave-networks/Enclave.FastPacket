@@ -16,7 +16,7 @@ public class Ipv4Tests
         var destIp = IPAddress.Parse("127.0.0.2");
 
         var packet = new PacketDotNet.IPv4Packet(sourceIp, destIp);
-        packet.FragmentFlags = 2;
+        packet.FragmentFlags = (byte)FragmentFlags.MoreFragments;
         packet.FragmentOffset = 56;
         packet.Id = 10;
         packet.HopLimit = 15;
@@ -31,11 +31,11 @@ public class Ipv4Tests
 
         var myIp = new Ipv4PacketReadOnlySpan(packetData);
 
-        myIp.Protocol.Should().Be(System.Net.Sockets.ProtocolType.Udp);
+        myIp.Protocol.Should().Be(IpProtocol.Udp);
         myIp.Source.ToIpAddress().Should().Be(sourceIp);
         myIp.Destination.ToIpAddress().Should().Be(destIp);
         myIp.FragmentFlags.Should().Be(FragmentFlags.MoreFragments);
-        myIp.FragmentValue.Should().Be(56);
+        myIp.FragmentOffset.Should().Be(56);
         myIp.Identification.Should().Be(10);
         myIp.Dscp.Should().Be(2);
         myIp.Ttl.Should().Be(15);
@@ -68,7 +68,7 @@ public class Ipv4Tests
 
         var myIp = new Ipv4PacketReadOnlySpan(packetData);
 
-        myIp.Protocol.Should().Be(System.Net.Sockets.ProtocolType.Tcp);
+        myIp.Protocol.Should().Be(IpProtocol.Tcp);
         myIp.Source.ToIpAddress().Should().Be(sourceIp);
         myIp.Destination.ToIpAddress().Should().Be(destIp);
         var tcp = new TcpPacketReadOnlySpan(myIp.Payload);
@@ -100,7 +100,7 @@ public class Ipv4Tests
 
         var myIp = new Ipv4PacketSpan(packetData);
 
-        myIp.Protocol.Should().Be(System.Net.Sockets.ProtocolType.Icmp);
+        myIp.Protocol.Should().Be(IpProtocol.Icmp);
         myIp.Source.ToIpAddress().Should().Be(sourceIp);
         myIp.Destination.ToIpAddress().Should().Be(destIp);
 

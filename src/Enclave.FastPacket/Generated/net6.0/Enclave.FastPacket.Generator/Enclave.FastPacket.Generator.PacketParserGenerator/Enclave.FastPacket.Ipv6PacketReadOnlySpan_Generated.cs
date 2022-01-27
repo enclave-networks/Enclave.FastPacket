@@ -24,54 +24,81 @@ namespace Enclave.FastPacket
 
         
         
+        /// <summary>
+        /// The IP version (6).
+        /// </summary>
         public byte Version
         {
            get => (byte)((_span[0] & 0xF0u) >> 4);
         }
         
         
+        /// <summary>
+        /// The traffic class.
+        /// </summary>
         public byte TrafficClass
         {
            get => (byte)((ushort)((BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0)) & 0xFF0u) >> 4));
         }
         
         
+        /// <summary>
+        /// The flow label, identifying a flow of packets between source and destination.
+        /// </summary>
         public uint FlowLabel
         {
            get => (uint)(BinaryPrimitives.ReadUInt32BigEndian(_span.Slice(0)) & 0xFFFFFu);
         }
         
         
+        /// <summary>
+        /// The size of the payload in bytes.
+        /// </summary>
         public ushort PayloadLength
         {
            get => BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0 + 4));
         }
         
         
-        public System.Net.Sockets.ProtocolType NextHeader
+        /// <summary>
+        /// The 'next header' value.
+        /// </summary>
+        public Enclave.FastPacket.IpProtocol NextHeader
         {
-           get => (System.Net.Sockets.ProtocolType)(_span[0 + 4 + sizeof(ushort)]);
+           get => (Enclave.FastPacket.IpProtocol)(_span[0 + 4 + sizeof(ushort)]);
         }
         
         
+        /// <summary>
+        /// The hop limit, decremented by every forwarding node.
+        /// </summary>
         public byte HopLimit
         {
            get => _span[0 + 4 + sizeof(ushort) + sizeof(byte)];
         }
         
         
+        /// <summary>
+        /// The source IPv6 address.
+        /// </summary>
         public Enclave.FastPacket.ValueIpAddress Source
         {
            get => new Enclave.FastPacket.ValueIpAddress(_span.Slice(0 + 4 + sizeof(ushort) + sizeof(byte) + sizeof(byte), 16));
         }
         
         
+        /// <summary>
+        /// The destination IPv6 address.
+        /// </summary>
         public Enclave.FastPacket.ValueIpAddress Destination
         {
            get => new Enclave.FastPacket.ValueIpAddress(_span.Slice(0 + 4 + sizeof(ushort) + sizeof(byte) + sizeof(byte) + 16, 16));
         }
         
         
+        /// <summary>
+        /// The payload.
+        /// </summary>
         public System.ReadOnlySpan<byte> Payload
         {
            get => _span.Slice(0 + 4 + sizeof(ushort) + sizeof(byte) + sizeof(byte) + 16 + 16);
