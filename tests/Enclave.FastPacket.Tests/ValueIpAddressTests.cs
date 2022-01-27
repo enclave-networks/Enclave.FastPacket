@@ -1,26 +1,22 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using FluentAssertions;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+using Xunit;
 
 namespace Enclave.FastPacket.Tests;
 
 public class ValueIpAddressTests
 {
-    [Test]
+    [Fact]
     public void CanReadIpv4Address()
     {
         var ipAddress = IPAddress.Parse("100.1.1.1");
 
         var valueIp = ValueIpAddress.Create(ipAddress);
 
-        Assert.AreEqual("100.1.1.1", valueIp.ToString());
+        valueIp.ToString().Should().Be("100.1.1.1");
     }
 
-    [Test]
+    [Fact]
     public void CanCompareIpv4Address()
     {
         var ipAddress1 = IPAddress.Parse("100.1.1.1");
@@ -32,15 +28,16 @@ public class ValueIpAddressTests
 
         var notCorrectIp = ValueIpAddress.Create(ipAddress2);
 
-        Assert.AreEqual(valueIp, repeat);
-        Assert.AreNotEqual(notCorrectIp, valueIp);
+        repeat.Should().Be(valueIp);
+        notCorrectIp.Should().NotBe(valueIp);
     }
 
-    [TestCase("2001:db8:3333:4444:5555:6666:7777:8888")]
-    [TestCase("2001:db8:3333:4444:cccc:dddd:eeee:ffff")]
-    [TestCase("::")]
-    [TestCase("::18.52.86.120")]
-    [TestCase("2001:db8::1234:5678")]
+    [Theory]
+    [InlineData("2001:db8:3333:4444:5555:6666:7777:8888")]
+    [InlineData("2001:db8:3333:4444:cccc:dddd:eeee:ffff")]
+    [InlineData("::")]
+    [InlineData("::18.52.86.120")]
+    [InlineData("2001:db8::1234:5678")]
     public void CanProcessIpv6Addresses(string ipv6Address)
     {
         var ipAddress = IPAddress.Parse(ipv6Address);
@@ -49,11 +46,11 @@ public class ValueIpAddressTests
 
         var repeat = ValueIpAddress.Create(ipAddress);
 
-        Assert.AreEqual(valueIp, repeat);
-        Assert.AreEqual(ipv6Address, valueIp.ToString());
+        repeat.Should().Be(valueIp);
+        valueIp.ToString().Should().Be(ipv6Address);
     }
 
-    [Test]
+    [Fact]
     public void EmptyIpv6AddressNotSameAsEmptyIpv4()
     {
         var emptyIpv6 = IPAddress.Parse("::");
@@ -62,6 +59,6 @@ public class ValueIpAddressTests
         var valueIpv6 = ValueIpAddress.Create(emptyIpv6);
         var valueIpv4 = ValueIpAddress.Create(emptyIpv4);
 
-        Assert.AreNotEqual(valueIpv6, valueIpv4);
+        valueIpv6.Should().NotBe(valueIpv4);
     }
 }

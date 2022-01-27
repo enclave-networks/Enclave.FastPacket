@@ -1,13 +1,14 @@
-using NUnit.Framework;
+using Xunit;
 using PacketDotNet;
 using System;
 using System.Net;
+using FluentAssertions;
 
 namespace Enclave.FastPacket.Tests;
 
 public class Ipv6Tests
 {
-    [Test]
+    [Fact]
     public void CanReadIpv6PacketWithUdpPayload()
     {
         var sourceIp = IPAddress.Parse("2001:db8:3333:4444:5555:6666:7777:8888");
@@ -27,18 +28,18 @@ public class Ipv6Tests
 
         var myIp = new Ipv6PacketSpan(packetData);
 
-        Assert.AreEqual(System.Net.Sockets.ProtocolType.Udp, myIp.NextHeader);
-        Assert.AreEqual(sourceIp, myIp.SourceAddress.ToIpAddress());
-        Assert.AreEqual(destIp, myIp.DestinationAddress.ToIpAddress());
+        myIp.NextHeader.Should().Be(System.Net.Sockets.ProtocolType.Udp);
+        myIp.Source.ToIpAddress().Should().Be(sourceIp);
+        myIp.Destination.ToIpAddress().Should().Be(destIp);
 
         var udp = new UdpPacketSpan(myIp.Payload);
 
-        Assert.AreEqual(1024, udp.SourcePort);
-        Assert.AreEqual(65102, udp.DestinationPort);
-        Assert.True(udp.Payload.SequenceEqual(new byte[] { 0x01, 0x02, 0x03 }));
+        udp.SourcePort.Should().Be(1024);
+        udp.DestinationPort.Should().Be(65102);
+        udp.Payload.Should().Equal(new byte[] { 0x01, 0x02, 0x03 });
     }
 
-    [Test]
+    [Fact]
     public void CanReadIpv6PacketWithTcpPayload()
     {
         var sourceIp = IPAddress.Parse("2001:db8:3333:4444:5555:6666:7777:8888");
@@ -55,14 +56,14 @@ public class Ipv6Tests
 
         var myIp = new Ipv6PacketSpan(packetData);
 
-        Assert.AreEqual(System.Net.Sockets.ProtocolType.Tcp, myIp.NextHeader);
-        Assert.AreEqual(sourceIp, myIp.SourceAddress.ToIpAddress());
-        Assert.AreEqual(destIp, myIp.DestinationAddress.ToIpAddress());
+        myIp.NextHeader.Should().Be(System.Net.Sockets.ProtocolType.Tcp);
+        myIp.Source.ToIpAddress().Should().Be(sourceIp);
+        myIp.Destination.ToIpAddress().Should().Be(destIp);
 
         var tcp = new TcpPacketSpan(myIp.Payload);
 
-        Assert.AreEqual(1024, tcp.SourcePort);
-        Assert.AreEqual(65102, tcp.DestinationPort);
-        Assert.True(tcp.Payload.SequenceEqual(new byte[] { 0x01, 0x02, 0x03 }));
+        tcp.SourcePort.Should().Be(1024);
+        tcp.DestinationPort.Should().Be(65102);
+        tcp.Payload.Should().Equal(new byte[] { 0x01, 0x02, 0x03 });
     }
 }

@@ -60,13 +60,13 @@ namespace Enclave.FastPacket
         }
         
         
-        public Enclave.FastPacket.ValueIpAddress SourceAddress
+        public Enclave.FastPacket.ValueIpAddress Source
         {
            get => new Enclave.FastPacket.ValueIpAddress(_span.Slice(0 + 4 + sizeof(ushort) + sizeof(byte) + sizeof(byte), 16));
         }
         
         
-        public Enclave.FastPacket.ValueIpAddress DestinationAddress
+        public Enclave.FastPacket.ValueIpAddress Destination
         {
            get => new Enclave.FastPacket.ValueIpAddress(_span.Slice(0 + 4 + sizeof(ushort) + sizeof(byte) + sizeof(byte) + 16, 16));
         }

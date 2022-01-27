@@ -5,63 +5,62 @@ using Microsoft.CodeAnalysis;
 using Scriban;
 using Scriban.Runtime;
 
-namespace Enclave.FastPacket.Generator
+namespace Enclave.FastPacket.Generator;
+
+internal class TemplatedParserBuilder : IParserBuilder
 {
-    internal class TemplatedParserBuilder : IParserBuilder
+    private Template _template;
+
+    public TemplatedParserBuilder(string templateName)
     {
-        private Template _template;
+        _template = Template.Parse(PacketParserGenerator.GetTemplateContent(templateName));
+    }
 
-        public TemplatedParserBuilder(string templateName)
+    public string Generate(PacketParserDefinition packetDef, GenerationOptions definitionTypeOptions, INamedTypeSymbol structSymbol, PacketPropertyFactory parserGenerator)
+    {
+        var sc = new ScriptObject();
+        sc.Import(new
         {
-            _template = Template.Parse(PacketParserGenerator.GetTemplateContent(templateName));
-        }
+            Namespace = structSymbol.GetFullNamespace(),
+            TypeName = structSymbol.Name,
+            Props = packetDef.PropertySet.ToList(),
+            MinSizeExpression = packetDef.MinSizeExpression,
+        },
+        renamer: m => m.Name);
 
-        public string Generate(PacketParserDefinition packetDef, GenerationOptions definitionTypeOptions, INamedTypeSymbol structSymbol, PacketPropertyFactory parserGenerator)
+        Func<IPacketProperty, string, string> getPropGetExpression = (IPacketProperty prop, string spanName)
+            => prop.ValueProvider.GetPropGetExpression(spanName, prop.PositionProvider.GetPositionExpression(spanName));
+
+        Func<IPacketProperty, string, string, string> getPropSetExpression = (IPacketProperty prop, string spanName, string valueExpr)
+            => prop.ValueProvider.GetPropSetExpression(spanName, prop.PositionProvider.GetPositionExpression(spanName), valueExpr);
+
+        Func<IPacketProperty, string> getTypeReferenceName = (IPacketProperty prop) =>
         {
-            var sc = new ScriptObject();
-            sc.Import(new
+            if (prop.ValueProvider.TypeSymbol.Equals(parserGenerator.SpanByteType, SymbolEqualityComparer.Default) &&
+                definitionTypeOptions.IsReadOnly)
             {
-                Namespace = structSymbol.GetFullNamespace(),
-                TypeName = structSymbol.Name,
-                Props = packetDef.PropertySet.ToList(),
-                MinSizeExpression = packetDef.MinSizeExpression,
-            },
-            renamer: m => m.Name);
+                return parserGenerator.ReadOnlySpanByteType.GetFullyQualifiedReference();
+            }
 
-            Func<IPacketProperty, string, string> getPropGetExpression = (IPacketProperty prop, string spanName)
-                => prop.ValueProvider.GetPropGetExpression(spanName, prop.PositionProvider.GetPositionExpression(spanName));
+            return prop.ValueProvider.TypeReferenceName;
+        };
 
-            Func<IPacketProperty, string, string, string> getPropSetExpression = (IPacketProperty prop, string spanName, string valueExpr)
-                => prop.ValueProvider.GetPropSetExpression(spanName, prop.PositionProvider.GetPositionExpression(spanName), valueExpr);
+        Func<IPacketProperty, string> getPropName = (IPacketProperty prop)
+            => prop.Name;
 
-            Func<IPacketProperty, string> getTypeReferenceName = (IPacketProperty prop) =>
-            {
-                if (prop.ValueProvider.TypeSymbol.Equals(parserGenerator.SpanByteType, SymbolEqualityComparer.Default) &&
-                    definitionTypeOptions.IsReadOnly)
-                {
-                    return parserGenerator.ReadOnlySpanByteType.GetFullyQualifiedReference();
-                }
+        Func<IPacketProperty, IEnumerable<string>> getPropComments = (IPacketProperty prop)
+            => prop.DocComments;
 
-                return prop.ValueProvider.TypeReferenceName;
-            };
+        Func<IPacketProperty, bool> canSet = (IPacketProperty prop)
+            => prop.ValueProvider.CanSet;
 
-            Func<IPacketProperty, string> getPropName = (IPacketProperty prop)
-                => prop.Name;
+        sc.Import("getPropGetExpr", getPropGetExpression);
+        sc.Import("getPropSetExpr", getPropSetExpression);
+        sc.Import("getTypeReferenceName", getTypeReferenceName);
+        sc.Import("getPropName", getPropName);
+        sc.Import("getPropComments", getPropComments);
+        sc.Import("canSet", canSet);
 
-            Func<IPacketProperty, IEnumerable<string>> getPropComments = (IPacketProperty prop)
-                => prop.DocComments;
-
-            Func<IPacketProperty, bool> canSet = (IPacketProperty prop)
-                => prop.ValueProvider.CanSet;
-
-            sc.Import("getPropGetExpr", getPropGetExpression);
-            sc.Import("getPropSetExpr", getPropSetExpression);
-            sc.Import("getTypeReferenceName", getTypeReferenceName);
-            sc.Import("getPropName", getPropName);
-            sc.Import("getPropComments", getPropComments);
-            sc.Import("canSet", canSet);
-
-            return _template.Render(new TemplateContext(sc));
-        }
+        return _template.Render(new TemplateContext(sc));
     }
 }

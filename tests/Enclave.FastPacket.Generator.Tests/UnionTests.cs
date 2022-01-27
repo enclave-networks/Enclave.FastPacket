@@ -1,16 +1,25 @@
+using Enclave.FastPacket.Generator.Tests.Helpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
+using System.Threading.Tasks;
+using VerifyXunit;
 using Xunit;
 
-namespace Enclave.FastPacket.Generator.Tests
+namespace Enclave.FastPacket.Generator.Tests;
+
+[UsesVerify]
+public class UnionTests
 {
-    public class UnionTests
+    public UnionTests()
+        : base()
     {
-        [Fact]
-        public void CanGenerateUnion()
-        {
-            var inputCompilation = CreateCompilation(@"
+    }
+
+    [Fact]
+    public Task CanGenerateUnion()
+    {
+        var inputCompilation = CompilationVerifier.Create(@"
 
 using Enclave.FastPacket.Generator;
 
@@ -38,34 +47,19 @@ namespace T
 }
             ");
 
-            var generator = new PacketParserGenerator();
+        var generator = new PacketParserGenerator();
 
-            GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
 
-            driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
 
-            var result = driver.GetRunResult();
+        return Verify(driver);
+    }
 
-            Assert.Empty(result.Diagnostics);
-
-            result.AssertGeneratedFile("T.ValueItem.Generated.cs", tree =>
-            {
-                var treeText = tree.GetText().ToString();
-
-                // Make sure we created a GUID generator.
-                Assert.Contains("private readonly Guid _backingId;", treeText);
-
-                // Check that the typeconverter gets added.
-                Assert.Contains("[TypeConverter(typeof(ValueItemTypeConverter))]", treeText);
-            });
-
-            result.AssertGeneratedFile("T.ValueItem.TypeConverter.cs");
-        }
-
-        [Fact]
-        public void CanGenerateUnionWithBitmask()
-        {
-            var inputCompilation = CreateCompilation(@"
+    [Fact]
+    public Task CanGenerateUnionWithBitmask()
+    {
+        var inputCompilation = CompilationVerifier.Create(@"
 
 using Enclave.FastPacket.Generator;
 
@@ -95,34 +89,19 @@ namespace T
 }
             ");
 
-            var generator = new PacketParserGenerator();
+        var generator = new PacketParserGenerator();
 
-            GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
 
-            driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
 
-            var result = driver.GetRunResult();
+        return Verify(driver);
+    }
 
-            Assert.Empty(result.Diagnostics);
-
-            result.AssertGeneratedFile("T.ValueItem.Generated.cs", tree =>
-            {
-                var treeText = tree.GetText().ToString();
-
-                // Make sure we created a GUID generator.
-                Assert.Contains("private readonly Guid _backingId;", treeText);
-
-                // Check that the typeconverter gets added.
-                Assert.Contains("[TypeConverter(typeof(ValueItemTypeConverter))]", treeText);
-            });
-
-            result.AssertGeneratedFile("T.ValueItem.TypeConverter.cs");
-        }
-
-        [Fact]
-        public void CanGenerateUnionWithLargeBitmask()
-        {
-            var inputCompilation = CreateCompilation(@"
+    [Fact]
+    public Task CanGenerateUnionWithLargeBitmask()
+    {
+        var inputCompilation = CompilationVerifier.Create(@"
 
 using Enclave.FastPacket.Generator;
 
@@ -172,37 +151,12 @@ namespace T
 }
             ");
 
-            var generator = new PacketParserGenerator();
+        var generator = new PacketParserGenerator();
 
-            GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
 
-            driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
 
-            var result = driver.GetRunResult();
-
-            Assert.Empty(result.Diagnostics);
-
-            result.AssertGeneratedFile("T.ValueItem.Generated.cs", tree =>
-            {
-                var treeText = tree.GetText().ToString();
-
-                // Make sure we created a GUID generator.
-                Assert.Contains("private readonly Guid _backingId;", treeText);
-
-                // Check that the typeconverter gets added.
-                Assert.Contains("[TypeConverter(typeof(ValueItemTypeConverter))]", treeText);
-            });
-
-            result.AssertGeneratedFile("T.ValueItem.TypeConverter.cs");
-        }
-
-
-        private static Compilation CreateCompilation(string source)
-            => CSharpCompilation.Create("compilation",
-                new[] { CSharpSyntaxTree.ParseText(source) },
-                new[] {
-                    MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location),
-                },
-                new CSharpCompilationOptions(OutputKind.ConsoleApplication));
+        return Verify(driver);
     }
 }

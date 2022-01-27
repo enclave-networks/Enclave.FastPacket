@@ -1,32 +1,31 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Enclave.FastPacket.Generator.ValueProviders
+namespace Enclave.FastPacket.Generator.ValueProviders;
+
+internal class CastingValueProvider : IValueProvider
 {
-    internal class CastingValueProvider : IValueProvider
+    private readonly IValueProvider _wrappedValueProvider;
+
+    public CastingValueProvider(INamedTypeSymbol castingTo, IValueProvider wrappedValueProvider)
     {
-        private readonly IValueProvider _wrappedValueProvider;
+        TypeSymbol = castingTo;
+        TypeReferenceName = castingTo.GetFullyQualifiedReference();
+        _wrappedValueProvider = wrappedValueProvider;
+    }
 
-        public CastingValueProvider(INamedTypeSymbol castingTo, IValueProvider wrappedValueProvider)
-        {
-            TypeSymbol = castingTo;
-            TypeReferenceName = castingTo.GetFullyQualifiedReference();
-            _wrappedValueProvider = wrappedValueProvider;
-        }
+    public INamedTypeSymbol TypeSymbol { get; set; }
 
-        public INamedTypeSymbol TypeSymbol { get; set; }
+    public bool CanSet => _wrappedValueProvider.CanSet;
 
-        public bool CanSet => _wrappedValueProvider.CanSet;
+    public string TypeReferenceName { get; set; }
 
-        public string TypeReferenceName { get; set; }
+    public string GetPropGetExpression(string spanName, string positionExpression)
+    {
+        return $"({TypeReferenceName})({_wrappedValueProvider.GetPropGetExpression(spanName, positionExpression)})";
+    }
 
-        public string GetPropGetExpression(string spanName, string positionExpression)
-        {
-            return $"({TypeReferenceName})({_wrappedValueProvider.GetPropGetExpression(spanName, positionExpression)})";
-        }
-
-        public string GetPropSetExpression(string spanName, string positionExpression, string valueExpression)
-        {
-            return _wrappedValueProvider.GetPropSetExpression(spanName, positionExpression, $"({_wrappedValueProvider.TypeReferenceName})({valueExpression})");
-        }
+    public string GetPropSetExpression(string spanName, string positionExpression, string valueExpression)
+    {
+        return _wrappedValueProvider.GetPropSetExpression(spanName, positionExpression, $"({_wrappedValueProvider.TypeReferenceName})({valueExpression})");
     }
 }

@@ -1,29 +1,28 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Enclave.FastPacket.Generator.SizeProviders
+namespace Enclave.FastPacket.Generator.SizeProviders;
+
+internal class FunctionSizeProvider : ISizeProvider
 {
-    internal class FunctionSizeProvider : ISizeProvider
+    public FunctionSizeProvider(IMethodSymbol positionMethod)
     {
-        public FunctionSizeProvider(IMethodSymbol positionMethod)
+        Method = positionMethod;
+        FullReferenceName = positionMethod.GetFullyQualifiedReference();
+    }
+
+    public IMethodSymbol Method { get; }
+
+    public string FullReferenceName { get; }
+
+    public string GetSizeExpression(string spanName, string positionExpression)
+    {
+        if (Method.Parameters.Length > 1)
         {
-            Method = positionMethod;
-            FullReferenceName = positionMethod.GetFullyQualifiedReference();
+            return $"{FullReferenceName}({spanName}, {positionExpression})";
         }
-
-        public IMethodSymbol Method { get; }
-
-        public string FullReferenceName { get; }
-
-        public string GetSizeExpression(string spanName, string positionExpression)
+        else
         {
-            if (Method.Parameters.Length > 1)
-            {
-                return $"{FullReferenceName}({spanName}, {positionExpression})";
-            }
-            else
-            {
-                return $"{FullReferenceName}({spanName})";
-            }
+            return $"{FullReferenceName}({spanName})";
         }
     }
 }

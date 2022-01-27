@@ -1,15 +1,15 @@
-using NUnit.Framework;
+using FluentAssertions;
 using PacketDotNet;
-using PacketDotNet.Tcp;
 using PacketDotNet.Utils;
 using System;
 using System.Net;
+using Xunit;
 
 namespace Enclave.FastPacket.Tests;
 
 public class Ipv4Tests
 {
-    [Test]
+    [Fact]
     public void CanReadIpv4PacketWithUdpPayload()
     {
         var sourceIp = IPAddress.Parse("10.0.0.1");
@@ -31,24 +31,24 @@ public class Ipv4Tests
 
         var myIp = new Ipv4PacketReadOnlySpan(packetData);
 
-        Assert.AreEqual(System.Net.Sockets.ProtocolType.Udp, myIp.Protocol);
-        Assert.AreEqual(sourceIp, myIp.Source.ToIpAddress());
-        Assert.AreEqual(destIp, myIp.Destination.ToIpAddress());
-        Assert.AreEqual(FragmentFlags.MoreFragments, myIp.FragmentFlags);
-        Assert.AreEqual(56, myIp.FragmentValue);
-        Assert.AreEqual(10, myIp.Identification);
-        Assert.AreEqual(2, myIp.Dscp);
-        Assert.AreEqual(15, myIp.Ttl);
-        Assert.AreEqual(0, myIp.Options.Length);
+        myIp.Protocol.Should().Be(System.Net.Sockets.ProtocolType.Udp);
+        myIp.Source.ToIpAddress().Should().Be(sourceIp);
+        myIp.Destination.ToIpAddress().Should().Be(destIp);
+        myIp.FragmentFlags.Should().Be(FragmentFlags.MoreFragments);
+        myIp.FragmentValue.Should().Be(56);
+        myIp.Identification.Should().Be(10);
+        myIp.Dscp.Should().Be(2);
+        myIp.Ttl.Should().Be(15);
+        myIp.Options.Length.Should().Be(0);
         
         var udp = new UdpPacketReadOnlySpan(myIp.Payload);
 
-        Assert.AreEqual(1024, udp.SourcePort);
-        Assert.AreEqual(65102, udp.DestinationPort);
-        Assert.True(udp.Payload.SequenceEqual(new byte[] { 0x01, 0x02, 0x03 }));
+        udp.SourcePort.Should().Be(1024);
+        udp.DestinationPort.Should().Be(65102);
+        udp.Payload.Should().Equal(new byte[] { 0x01, 0x02, 0x03 });
     }
 
-    [Test]
+    [Fact]
     public void CanReadIpv4PacketWithTcpPayload()
     {
         var sourceIp = IPAddress.Parse("10.0.0.1");
@@ -68,21 +68,20 @@ public class Ipv4Tests
 
         var myIp = new Ipv4PacketReadOnlySpan(packetData);
 
-        Assert.AreEqual(System.Net.Sockets.ProtocolType.Tcp, myIp.Protocol);
-        Assert.AreEqual(sourceIp, myIp.Source.ToIpAddress());
-        Assert.AreEqual(destIp, myIp.Destination.ToIpAddress());
-
+        myIp.Protocol.Should().Be(System.Net.Sockets.ProtocolType.Tcp);
+        myIp.Source.ToIpAddress().Should().Be(sourceIp);
+        myIp.Destination.ToIpAddress().Should().Be(destIp);
         var tcp = new TcpPacketReadOnlySpan(myIp.Payload);
 
-        Assert.AreEqual(1024, tcp.SourcePort);
-        Assert.AreEqual(65102, tcp.DestinationPort);
-        Assert.AreEqual(TcpFlags.Psh | TcpFlags.Urg, tcp.Flags);
-        Assert.AreEqual(15, tcp.UrgentPointer);
-        Assert.AreEqual(2000, tcp.WindowSize);
-        Assert.True(tcp.Payload.SequenceEqual(new byte[] { 0x01, 0x02, 0x03 }));
+        tcp.SourcePort.Should().Be(1024);
+        tcp.DestinationPort.Should().Be(65102);
+        tcp.Flags.Should().Be(TcpFlags.Psh | TcpFlags.Urg);
+        tcp.UrgentPointer.Should().Be(15);
+        tcp.WindowSize.Should().Be(2000);
+        tcp.Payload.Should().Equal(new byte[] { 0x01, 0x02, 0x03 });
     }
 
-    [Test]
+    [Fact]
     public void CanReadIpv4PacketWithIcmpPayload()
     {
         var sourceIp = IPAddress.Parse("10.0.0.1");
@@ -101,28 +100,15 @@ public class Ipv4Tests
 
         var myIp = new Ipv4PacketSpan(packetData);
 
-        Assert.AreEqual(System.Net.Sockets.ProtocolType.Icmp, myIp.Protocol);
-        Assert.AreEqual(sourceIp, myIp.Source.ToIpAddress());
-        Assert.AreEqual(destIp, myIp.Destination.ToIpAddress());
+        myIp.Protocol.Should().Be(System.Net.Sockets.ProtocolType.Icmp);
+        myIp.Source.ToIpAddress().Should().Be(sourceIp);
+        myIp.Destination.ToIpAddress().Should().Be(destIp);
 
         var icmp = new Icmpv4PacketSpan(myIp.Payload);
 
-        Assert.AreEqual(Icmpv4Types.DestinationUnreachable, icmp.Type);
+        icmp.Type.Should().Be(Icmpv4Types.DestinationUnreachable);
 
         // 3 is the code for port unreachable.
-        Assert.AreEqual(3, icmp.Code);
+        icmp.Code.Should().Be(3);
     }
-
-    [Test]
-    public void CanCreateBlankIpPacket()
-    {
-        //var length = Ipv4PacketSpan.GetLengthIncludingPayload(128);
-
-        //var buffer = new byte[length];
-
-        //var blank = Ipv4PacketSpan.CreateBlank(buffer, 128);
-
-        //Assert.AreEqual(0x45, buffer[0]);
-    }
-
 }

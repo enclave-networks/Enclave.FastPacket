@@ -1,10 +1,9 @@
-﻿namespace Enclave.FastPacket.Generator.SizeProviders
+﻿namespace Enclave.FastPacket.Generator.SizeProviders;
+
+/// <summary>
+/// Indicates that a provider gives a constant size known at compile time, with no evaluation required.
+/// </summary>
+internal interface IConstantSizeProvider : ISizeProvider
 {
-    /// <summary>
-    /// Indicates that a provider gives a constant size known at compile time, with no evaluation required.
-    /// </summary>
-    internal interface IConstantSizeProvider : ISizeProvider
-    {
-        string GetConstantSizeExpression();
-    }
+    string GetConstantSizeExpression();
 }

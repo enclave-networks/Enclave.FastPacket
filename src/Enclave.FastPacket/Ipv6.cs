@@ -27,10 +27,10 @@ internal ref struct Ipv6Definition
     public byte HopLimit { get; set; }
 
     [PacketField(Size = ValueIpAddress.Ipv6Length)]
-    public ValueIpAddress SourceAddress { get; set; }
+    public ValueIpAddress Source { get; set; }
 
     [PacketField(Size = ValueIpAddress.Ipv6Length)]
-    public ValueIpAddress DestinationAddress { get; set; }
+    public ValueIpAddress Destination { get; set; }
 
     public ReadOnlySpan<byte> Payload { get; set; }
 }

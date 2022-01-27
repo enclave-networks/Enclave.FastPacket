@@ -20,7 +20,7 @@ namespace {{Namespace}}
             _span = packetData;
         }
 
-        public ReadOnlySpan<byte> GetRawData() => _span;
+        public ReadOnlySpan<byte> GetRawData( => _span;
 
         {{ for prop in Props }}
         {{ for comment in (getPropComments prop) }}
