@@ -133,16 +133,8 @@ internal ref struct Ipv4Definition
     {
         // IHL field is the header size in 32-bit words. Options is 0-length if
         // IHL is 5.
-        return (new Ipv4PacketReadOnlySpan(span).IHL - 5) * 4;
+        return (new ReadOnlyIpv4PacketSpan(span).IHL - 5) * 4;
     }
-}
-
-/// <summary>
-/// A readonly decoder for an IPv4 packet.
-/// </summary>
-[PacketImplementation(typeof(Ipv4Definition), IsReadOnly = true)]
-public readonly ref partial struct Ipv4PacketReadOnlySpan
-{
 }
 
 /// <summary>
@@ -151,4 +143,13 @@ public readonly ref partial struct Ipv4PacketReadOnlySpan
 [PacketImplementation(typeof(Ipv4Definition))]
 public readonly ref partial struct Ipv4PacketSpan
 {
+}
+
+/// <summary>
+/// A readonly decoder for an IPv4 packet.
+/// </summary>
+[PacketImplementation(typeof(Ipv4Definition), IsReadOnly = true)]
+public readonly ref partial struct ReadOnlyIpv4PacketSpan
+{
+    public static implicit operator ReadOnlyIpv4PacketSpan(Ipv4PacketSpan s) => new ReadOnlyIpv4PacketSpan(s.GetRawData());
 }

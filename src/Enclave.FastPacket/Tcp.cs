@@ -110,7 +110,7 @@ internal ref struct TcpPacketDefinition
 
     public static int GetOptionSize(ReadOnlySpan<byte> packet)
     {
-        return (new TcpPacketReadOnlySpan(packet).DataOffset - 5) * 4;
+        return (new ReadOnlyTcpPacketSpan(packet).DataOffset - 5) * 4;
     }
 }
 
@@ -133,6 +133,7 @@ public readonly ref partial struct TcpPacketSpan
 /// A read-write decoder for a TCP packet.
 /// </summary>
 [PacketImplementation(typeof(TcpPacketDefinition), IsReadOnly = true)]
-public readonly ref partial struct TcpPacketReadOnlySpan
+public readonly ref partial struct ReadOnlyTcpPacketSpan
 {
+    public static implicit operator ReadOnlyTcpPacketSpan(TcpPacketSpan s) => new ReadOnlyTcpPacketSpan(s.GetRawData());
 }

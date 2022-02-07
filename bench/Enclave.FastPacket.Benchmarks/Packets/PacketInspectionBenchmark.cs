@@ -83,11 +83,11 @@ public class PacketInspectionBenchmark
 
         if (ethernetPacket.Type == EthernetType.IPv4)
         {
-            var ipPacket = new Ipv4PacketReadOnlySpan(ethernetPacket.Payload);
+            var ipPacket = new ReadOnlyIpv4PacketSpan(ethernetPacket.Payload);
 
             if (ipPacket.Protocol == IpProtocol.Udp)
             {
-                var udpPacket = new UdpPacketReadOnlySpan(ipPacket.Payload);
+                var udpPacket = new ReadOnlyUdpPacketSpan(ipPacket.Payload);
 
                 var srcPort = udpPacket.SourcePort;
                 var dstPort = udpPacket.DestinationPort;
@@ -135,11 +135,11 @@ public class PacketInspectionBenchmark
 
         if (ethernetPacket.Type == EthernetType.IPv4)
         {
-            var ipPacket = new Ipv4PacketReadOnlySpan(ethernetPacket.Payload);
+            var ipPacket = new ReadOnlyIpv4PacketSpan(ethernetPacket.Payload);
 
             if (ipPacket.Protocol == IpProtocol.Tcp)
             {
-                var tcpPacket = new TcpPacketReadOnlySpan(ipPacket.Payload);
+                var tcpPacket = new ReadOnlyTcpPacketSpan(ipPacket.Payload);
 
                 var srcPort = tcpPacket.SourcePort;
                 var dstPort = tcpPacket.DestinationPort;
@@ -187,11 +187,11 @@ public class PacketInspectionBenchmark
 
         if (ethernetPacket.Type == EthernetType.IPv4)
         {
-            var ipPacket = new Ipv4PacketReadOnlySpan(ethernetPacket.Payload);
+            var ipPacket = new ReadOnlyIpv4PacketSpan(ethernetPacket.Payload);
 
             if (ipPacket.Protocol == IpProtocol.Tcp)
             {
-                var tcpPacket = new TcpPacketReadOnlySpan(ipPacket.Payload);
+                var tcpPacket = new ReadOnlyTcpPacketSpan(ipPacket.Payload);
 
                 var payloadSize = tcpPacket.Payload.Length;
 
@@ -235,11 +235,11 @@ public class PacketInspectionBenchmark
 
         if (ethernetPacket.Type == EthernetType.IPv4)
         {
-            var ipPacket = new Ipv4PacketReadOnlySpan(ethernetPacket.Payload);
+            var ipPacket = new ReadOnlyIpv4PacketSpan(ethernetPacket.Payload);
 
             if (ipPacket.Protocol == IpProtocol.Tcp)
             {
-                var tcpPacket = new TcpPacketReadOnlySpan(ipPacket.Payload);
+                var tcpPacket = new ReadOnlyTcpPacketSpan(ipPacket.Payload);
 
                 if (!tcpPacket.Flags.HasFlag(TcpFlags.Ack))
                 {

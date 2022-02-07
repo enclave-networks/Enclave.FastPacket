@@ -23,6 +23,6 @@ public readonly ref partial struct Icmpv4AddressMaskSpan
 }
 
 [PacketImplementation(typeof(Icmpv4AddressMaskDefinition), IsReadOnly = true)]
-public readonly ref partial struct Icmpv4AddressMaskReadOnlySpan
+public readonly ref partial struct ReadOnlyIcmpv4AddressMaskSpan
 {
 }

@@ -31,6 +31,7 @@ public readonly ref partial struct ArpPacketSpan
 }
 
 [PacketImplementation(typeof(ArpPacketDefinition), IsReadOnly = true)]
-public readonly ref partial struct ArpPacketReadOnlySpan
+public readonly ref partial struct ReadOnlyArpPacketSpan
 {
+    public static implicit operator ReadOnlyArpPacketSpan(ArpPacketSpan s) => new ReadOnlyArpPacketSpan(s.GetRawData());
 }

@@ -48,9 +48,9 @@ public readonly ref partial struct Icmpv4PacketSpan
 }
 
 [PacketImplementation(typeof(Icmpv4Definition), IsReadOnly = true)]
-public readonly ref partial struct Icmpv4PacketReadOnlySpan
+public readonly ref partial struct ReadOnlyIcmpv4PacketSpan
 {
-    public static implicit operator Icmpv4PacketReadOnlySpan(Icmpv4PacketSpan s) => new Icmpv4PacketReadOnlySpan(s.GetRawData());
+    public static implicit operator ReadOnlyIcmpv4PacketSpan(Icmpv4PacketSpan s) => new ReadOnlyIcmpv4PacketSpan(s.GetRawData());
 }
 
 public static class Icmpv4Extensions
@@ -65,14 +65,14 @@ public static class Icmpv4Extensions
         return new Icmpv4SourceQuenchSpan(icmp.GetRawData());
     }
 
-    public static Icmpv4SourceQuenchReadOnlySpan AsSourceQuench(this Icmpv4PacketReadOnlySpan icmp)
+    public static ReadOnlyIcmpv4SourceQuenchSpan AsSourceQuench(this ReadOnlyIcmpv4PacketSpan icmp)
     {
         if (icmp.Type != Icmpv4Types.SourceQuench)
         {
             ThrowException($"Expected {Icmpv4Types.SourceQuench}, but found {icmp.Type}", icmp);
         }
 
-        return new Icmpv4SourceQuenchReadOnlySpan(icmp.GetRawData());
+        return new ReadOnlyIcmpv4SourceQuenchSpan(icmp.GetRawData());
     }
 
     public static Icmpv4RedirectSpan AsRedirect(this Icmpv4PacketSpan icmp)
@@ -85,14 +85,14 @@ public static class Icmpv4Extensions
         return new Icmpv4RedirectSpan(icmp.GetRawData());
     }
 
-    public static Icmpv4RedirectReadOnlySpan AsRedirect(this Icmpv4PacketReadOnlySpan icmp)
+    public static ReadOnlyIcmpv4RedirectSpan AsRedirect(this ReadOnlyIcmpv4PacketSpan icmp)
     {
         if (icmp.Type != Icmpv4Types.RedirectMessage)
         {
             ThrowException($"Expected {Icmpv4Types.RedirectMessage}, but found {icmp.Type}", icmp);
         }
 
-        return new Icmpv4RedirectReadOnlySpan(icmp.GetRawData());
+        return new ReadOnlyIcmpv4RedirectSpan(icmp.GetRawData());
     }
 
     public static Icmpv4TimeExceededSpan AsTimeExceeded(this Icmpv4PacketSpan icmp)
@@ -105,14 +105,14 @@ public static class Icmpv4Extensions
         return new Icmpv4TimeExceededSpan(icmp.GetRawData());
     }
 
-    public static Icmpv4TimeExceededReadOnlySpan AsTimeExceeded(this Icmpv4PacketReadOnlySpan icmp)
+    public static ReadOnlyIcmpv4TimeExceededSpan AsTimeExceeded(this ReadOnlyIcmpv4PacketSpan icmp)
     {
         if (icmp.Type != Icmpv4Types.TimeExceeded)
         {
             ThrowException($"Expected {Icmpv4Types.TimeExceeded}, but found {icmp.Type}", icmp);
         }
 
-        return new Icmpv4TimeExceededReadOnlySpan(icmp.GetRawData());
+        return new ReadOnlyIcmpv4TimeExceededSpan(icmp.GetRawData());
     }
 
     public static Icmpv4TimestampSpan AsTimestamp(this Icmpv4PacketSpan icmp)
@@ -125,14 +125,14 @@ public static class Icmpv4Extensions
         return new Icmpv4TimestampSpan(icmp.GetRawData());
     }
 
-    public static Icmpv4TimestampReadOnlySpan AsTimestamp(this Icmpv4PacketReadOnlySpan icmp)
+    public static ReadOnlyIcmpv4TimestampSpan AsTimestamp(this ReadOnlyIcmpv4PacketSpan icmp)
     {
         if (icmp.Type != Icmpv4Types.Timestamp && icmp.Type != Icmpv4Types.TimestampReply)
         {
             ThrowException($"Expected {Icmpv4Types.Timestamp} or {Icmpv4Types.TimestampReply}, but found {icmp.Type}", icmp);
         }
 
-        return new Icmpv4TimestampReadOnlySpan(icmp.GetRawData());
+        return new ReadOnlyIcmpv4TimestampSpan(icmp.GetRawData());
     }
 
     public static Icmpv4TimestampSpan AsDestinationUnreachable(this Icmpv4PacketSpan icmp)
@@ -145,18 +145,18 @@ public static class Icmpv4Extensions
         return new Icmpv4TimestampSpan(icmp.GetRawData());
     }
 
-    public static Icmpv4TimestampReadOnlySpan AsDestinationUnreachable(this Icmpv4PacketReadOnlySpan icmp)
+    public static ReadOnlyIcmpv4TimestampSpan AsDestinationUnreachable(this ReadOnlyIcmpv4PacketSpan icmp)
     {
         if (icmp.Type != Icmpv4Types.Timestamp && icmp.Type != Icmpv4Types.TimestampReply)
         {
             ThrowException($"Expected {Icmpv4Types.Timestamp} or {Icmpv4Types.TimestampReply}, but found {icmp.Type}", icmp);
         }
 
-        return new Icmpv4TimestampReadOnlySpan(icmp.GetRawData());
+        return new ReadOnlyIcmpv4TimestampSpan(icmp.GetRawData());
     }
 
     [DoesNotReturn]
-    private static void ThrowException(string message, Icmpv4PacketReadOnlySpan packet)
+    private static void ThrowException(string message, ReadOnlyIcmpv4PacketSpan packet)
     {
         throw new FastPacketException(message, packet.GetRawData());
     }

@@ -44,6 +44,6 @@ public readonly ref partial struct Icmpv4DestinationUnreachableSpan
 }
 
 [PacketImplementation(typeof(Icmpv4DestinationUnreachableDefinition), IsReadOnly = true)]
-public readonly ref partial struct Icmpv4DestinationUnreachableReadOnlySpan
+public readonly ref partial struct ReadOnlyIcmpv4DestinationUnreachableSpan
 {
 }

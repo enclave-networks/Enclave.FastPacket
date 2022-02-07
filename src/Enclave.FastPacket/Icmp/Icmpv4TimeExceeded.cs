@@ -28,6 +28,6 @@ public readonly ref partial struct Icmpv4TimeExceededSpan
 }
 
 [PacketImplementation(typeof(Icmpv4TimeExceededDefinition), IsReadOnly = true)]
-public readonly ref partial struct Icmpv4TimeExceededReadOnlySpan
+public readonly ref partial struct ReadOnlyIcmpv4TimeExceededSpan
 {
 }

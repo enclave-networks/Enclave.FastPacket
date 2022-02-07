@@ -31,6 +31,6 @@ public readonly ref partial struct Icmpv4RedirectSpan
 }
 
 [PacketImplementation(typeof(Icmpv4RedirectDefinition), IsReadOnly = true)]
-public readonly ref partial struct Icmpv4RedirectReadOnlySpan
+public readonly ref partial struct ReadOnlyIcmpv4RedirectSpan
 {
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Buffers.Binary;
 using Enclave.FastPacket.Generator;
 
 namespace Enclave.FastPacket;
@@ -23,6 +22,7 @@ public readonly ref partial struct UdpPacketSpan
 }
 
 [PacketImplementation(typeof(UdpPacketDefinition), IsReadOnly = true)]
-public readonly ref partial struct UdpPacketReadOnlySpan
+public readonly ref partial struct ReadOnlyUdpPacketSpan
 {
+    public static implicit operator ReadOnlyUdpPacketSpan(UdpPacketSpan s) => new ReadOnlyUdpPacketSpan(s.GetRawData());
 }

@@ -27,6 +27,6 @@ public readonly ref partial struct Icmpv4TimestampSpan
 }
 
 [PacketImplementation(typeof(Icmpv4TimestampDefinition), IsReadOnly = true)]
-public readonly ref partial struct Icmpv4TimestampReadOnlySpan
+public readonly ref partial struct ReadOnlyIcmpv4TimestampSpan
 {
 }

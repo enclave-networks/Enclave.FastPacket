@@ -22,6 +22,6 @@ public readonly ref partial struct Icmpv4SourceQuenchSpan
 }
 
 [PacketImplementation(typeof(Icmpv4SourceQuenchDefinition), IsReadOnly = true)]
-public readonly ref partial struct Icmpv4SourceQuenchReadOnlySpan
+public readonly ref partial struct ReadOnlyIcmpv4SourceQuenchSpan
 {
 }

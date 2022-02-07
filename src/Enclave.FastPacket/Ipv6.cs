@@ -73,6 +73,7 @@ public readonly ref partial struct Ipv6PacketSpan
 /// A read-write decoder for an IPv6 packet.
 /// </summary>
 [PacketImplementation(typeof(Ipv6Definition), IsReadOnly = true)]
-public readonly ref partial struct Ipv6PacketReadOnlySpan
+public readonly ref partial struct ReadOnlyIpv6PacketSpan
 {
+    public static implicit operator ReadOnlyIpv6PacketSpan(Ipv6PacketSpan s) => new ReadOnlyIpv6PacketSpan(s.GetRawData());
 }

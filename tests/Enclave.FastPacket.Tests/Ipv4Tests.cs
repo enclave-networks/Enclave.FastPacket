@@ -29,7 +29,7 @@ public class Ipv4Tests
 
         var packetData = packet.Bytes;
 
-        var myIp = new Ipv4PacketReadOnlySpan(packetData);
+        var myIp = new ReadOnlyIpv4PacketSpan(packetData);
 
         myIp.Protocol.Should().Be(IpProtocol.Udp);
         myIp.Source.ToIpAddress().Should().Be(sourceIp);
@@ -41,7 +41,7 @@ public class Ipv4Tests
         myIp.Ttl.Should().Be(15);
         myIp.Options.Length.Should().Be(0);
         
-        var udp = new UdpPacketReadOnlySpan(myIp.Payload);
+        var udp = new ReadOnlyUdpPacketSpan(myIp.Payload);
 
         udp.SourcePort.Should().Be(1024);
         udp.DestinationPort.Should().Be(65102);
@@ -66,12 +66,12 @@ public class Ipv4Tests
 
         var packetData = packet.Bytes;
 
-        var myIp = new Ipv4PacketReadOnlySpan(packetData);
+        var myIp = new ReadOnlyIpv4PacketSpan(packetData);
 
         myIp.Protocol.Should().Be(IpProtocol.Tcp);
         myIp.Source.ToIpAddress().Should().Be(sourceIp);
         myIp.Destination.ToIpAddress().Should().Be(destIp);
-        var tcp = new TcpPacketReadOnlySpan(myIp.Payload);
+        var tcp = new ReadOnlyTcpPacketSpan(myIp.Payload);
 
         tcp.SourcePort.Should().Be(1024);
         tcp.DestinationPort.Should().Be(65102);
