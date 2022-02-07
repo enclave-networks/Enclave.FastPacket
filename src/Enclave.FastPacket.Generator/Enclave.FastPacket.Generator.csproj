@@ -21,7 +21,7 @@
         <Authors>Enclave Networks</Authors>
         <Description>Generate fast packet decoders from a packet description..</Description>
         <Copyright>Enclave Networks 2022</Copyright>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/enclave-networks/Enclave.FastPacket</PackageProjectUrl>
         <RepositoryUrl>https://github.com/enclave-networks/Enclave.FastPacket</RepositoryUrl>
         <RepositoryType>GitHub</RepositoryType>
