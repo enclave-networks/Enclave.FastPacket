@@ -5,9 +5,6 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <PackageId>Enclave.FastPacket</PackageId>
         <Version>1.0.0</Version>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <RepositoryType>git</RepositoryType>
-        <RepositoryUrl>https://github.com/enclave-networks/Enclave.FastPacket</RepositoryUrl>
     </PropertyGroup>
     
     <PropertyGroup>
@@ -17,9 +14,10 @@
         <Copyright>Enclave Networks 2022</Copyright>
         <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/enclave-networks/Enclave.FastPacket</PackageProjectUrl>
+        <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/enclave-networks/Enclave.FastPacket</RepositoryUrl>
         <RepositoryType>GitHub</RepositoryType>
-        <PackageTags>generator</PackageTags>
+        <PackageTags>ethernet, network</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 

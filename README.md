@@ -2,6 +2,9 @@
 
 The FastPacket project provides efficient, zero-allocation mechanisms for reading and writing individual network packets.
 
+![Github Actions](https://github.com/enclave-networks/Enclave.FastPacket/actions/workflows/build.yml/badge.svg?branch=develop)
+![NuGet](https://img.shields.io/nuget/v/Enclave.FastPacket.svg)](https://nuget.org/packages/Enclave.FastPacket)
+
 > The library is currently pre-release as we work on tests and more protocol support.
 
 This project consists of two projects/packages:
