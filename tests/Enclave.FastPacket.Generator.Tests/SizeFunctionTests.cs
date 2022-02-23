@@ -23,12 +23,12 @@ namespace T
     internal ref struct PacketDefinition
     {
         [PacketField(SizeFunction = nameof(ValueFunc))]
-        ReadOnlySpan<byte> Value { get; set; }
+        public ReadOnlySpan<byte> Value { get; set; }
 
         [PacketField(SizeFunction = nameof(Value2Func))]
-        ReadOnlySpan<byte> Value2 { get; set; }
+        public ReadOnlySpan<byte> Value2 { get; set; }
 
-        ReadOnlySpan<byte> Remaining { get; set; }
+        public ReadOnlySpan<byte> Remaining { get; set; }
 
         public static int ValueFunc(ReadOnlySpan<byte> span, int position)
         {

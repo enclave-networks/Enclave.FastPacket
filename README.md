@@ -240,6 +240,25 @@ public readonly ref partial struct MyPacket
 }
 ```
 
+### Field Visibility
+
+The visibility of fields in the packet definition become the visibility of those fields in the implementation.
+
+This is useful for fields that use up space in the packet, but are unused, so shouldn't be externally visible.
+
+```csharp
+struct MyPacketDefinition
+{
+    // This field will use up space in the packet, but will be private in the implementation
+    private ushort UnusedValue { get; set; }
+
+    // This field will use up space in the packet, but will be internal in the implementation
+    internal ushort InternalValue { get; set; }
+
+    public ushort Value1 { get; set; }
+}
+```
+
 ### Customising Fields
 
 If you need to adjust individual fields, you can apply the `PacketField` attribute:

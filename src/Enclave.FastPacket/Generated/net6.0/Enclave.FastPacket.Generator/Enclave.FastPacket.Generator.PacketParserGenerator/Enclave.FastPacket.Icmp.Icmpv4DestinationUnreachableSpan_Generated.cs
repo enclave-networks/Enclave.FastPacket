@@ -15,11 +15,17 @@ namespace Enclave.FastPacket.Icmp
         /// </summary>
         public const int MinimumSize = sizeof(byte) + sizeof(byte) + sizeof(ushort) + sizeof(ushort) + sizeof(ushort);
 
+        /// <summary>
+        /// Create a new instance of <see cref="Icmpv4DestinationUnreachableSpan"/>.
+        /// </summary>
         public Icmpv4DestinationUnreachableSpan(Span<byte> packetData)
         {
             _span = packetData;
         }
 
+        /// <summary>
+        /// Gets the raw underlying buffer for this packet.
+        /// </summary>
         public Span<byte> GetRawData() => _span;
 
         
@@ -45,7 +51,7 @@ namespace Enclave.FastPacket.Icmp
         }
         
         
-        public ushort Unused
+        private ushort Unused
         {
            get => BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0 + sizeof(byte) + sizeof(byte) + sizeof(ushort)));
            set => BinaryPrimitives.WriteUInt16BigEndian(_span.Slice(0 + sizeof(byte) + sizeof(byte) + sizeof(ushort)), value); 

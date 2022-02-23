@@ -15,17 +15,23 @@ namespace {{Namespace}}
         /// </summary>
         public const int MinimumSize = {{ MinSizeExpression }};
 
+        /// <summary>
+        /// Create a new instance of <see cref="{{TypeName}}"/>.
+        /// </summary>
         public {{TypeName}}(ReadOnlySpan<byte> packetData)
         {
             _span = packetData;
         }
 
+        /// <summary>
+        /// Gets the raw underlying buffer for this packet.
+        /// </summary>
         public ReadOnlySpan<byte> GetRawData() => _span;
 
         {{ for prop in Props }}
         {{ for comment in (getPropComments prop) }}
         /// {{ comment }}{{ end }}
-        public {{ getTypeReferenceName prop }} {{ getPropName prop }}
+        {{ getPropAccessibility prop }} {{ getTypeReferenceName prop }} {{ getPropName prop }}
         {
            get => {{ getPropGetExpr prop "_span" }};
         }

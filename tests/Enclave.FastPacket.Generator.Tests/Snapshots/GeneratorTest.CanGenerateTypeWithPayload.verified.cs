@@ -16,11 +16,17 @@ namespace T
         /// </summary>
         public const int MinimumSize = sizeof(int);
 
+        /// <summary>
+        /// Create a new instance of <see cref="PacketParser"/>.
+        /// </summary>
         public PacketParser(Span<byte> packetData)
         {
             _span = packetData;
         }
 
+        /// <summary>
+        /// Gets the raw underlying buffer for this packet.
+        /// </summary>
         public Span<byte> GetRawData() => _span;
 
         

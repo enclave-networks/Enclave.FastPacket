@@ -9,6 +9,8 @@ internal interface IPacketProperty
 {
     public string Name { get; }
 
+    public string Accessibility { get; }
+
     public IPositionProvider PositionProvider { get; }
 
     public ISizeProvider SizeProvider { get; }

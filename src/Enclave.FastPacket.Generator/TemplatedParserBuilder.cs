@@ -48,6 +48,9 @@ internal class TemplatedParserBuilder : IParserBuilder
         Func<IPacketProperty, string> getPropName = (IPacketProperty prop)
             => prop.Name;
 
+        Func<IPacketProperty, string> getPropAccessibility = (IPacketProperty prop)
+            => prop.Accessibility;
+
         Func<IPacketProperty, IEnumerable<string>> getPropComments = (IPacketProperty prop)
             => prop.DocComments;
 
@@ -58,6 +61,7 @@ internal class TemplatedParserBuilder : IParserBuilder
         sc.Import("getPropSetExpr", getPropSetExpression);
         sc.Import("getTypeReferenceName", getTypeReferenceName);
         sc.Import("getPropName", getPropName);
+        sc.Import("getPropAccessibility", getPropAccessibility);
         sc.Import("getPropComments", getPropComments);
         sc.Import("canSet", canSet);
 

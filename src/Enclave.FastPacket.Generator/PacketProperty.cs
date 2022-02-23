@@ -9,6 +9,7 @@ internal class PacketProperty : IPacketProperty
 {
     public PacketProperty(
         string name,
+        string accessibility,
         PacketFieldOptions options,
         IPositionProvider positionProvider,
         ISizeProvider sizeProvider,
@@ -16,6 +17,7 @@ internal class PacketProperty : IPacketProperty
         IEnumerable<string> docComments)
     {
         Name = name;
+        Accessibility = accessibility;
         PositionProvider = positionProvider;
         SizeProvider = sizeProvider;
         ValueProvider = valueProvider;
@@ -23,6 +25,8 @@ internal class PacketProperty : IPacketProperty
     }
 
     public string Name { get; }
+
+    public string Accessibility { get; }
 
     public IPositionProvider PositionProvider { get; }
 

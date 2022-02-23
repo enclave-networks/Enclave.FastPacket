@@ -127,7 +127,7 @@ dotnet_diagnostic.CA1721.severity = suggestion
 dotnet_diagnostic.CA1720.severity = none
 
 # SA1602: Enumeration items should be documented
-dotnet_diagnostic.SA1602.severity = suggestion
+dotnet_diagnostic.SA1602.severity = none
 
 # SA1642: Constructor summary documentation should begin with standard text
 dotnet_diagnostic.SA1642.severity = none

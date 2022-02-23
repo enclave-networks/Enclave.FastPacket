@@ -3,6 +3,9 @@ using Enclave.FastPacket.Generator;
 
 namespace Enclave.FastPacket;
 
+/// <summary>
+/// Defines the possible TCP flags.
+/// </summary>
 [Flags]
 public enum TcpFlags
 {
@@ -38,9 +41,19 @@ public enum TcpFlags
     /// </summary>
     Urg = 1 << 5,
 
+    /// <summary>
+    /// ECE Flag.
+    /// </summary>
     Ece = 1 << 6,
 
+    /// <summary>
+    /// CWR Flag.
+    /// </summary>
     Cwr = 1 << 7,
+
+    /// <summary>
+    /// NS Flag.
+    /// </summary>
     Ns = 1 << 8,
 }
 
@@ -135,5 +148,8 @@ public readonly ref partial struct TcpPacketSpan
 [PacketImplementation(typeof(TcpPacketDefinition), IsReadOnly = true)]
 public readonly ref partial struct ReadOnlyTcpPacketSpan
 {
+    /// <summary>
+    /// Convert to a readonly representation.
+    /// </summary>
     public static implicit operator ReadOnlyTcpPacketSpan(TcpPacketSpan s) => new ReadOnlyTcpPacketSpan(s.GetRawData());
 }

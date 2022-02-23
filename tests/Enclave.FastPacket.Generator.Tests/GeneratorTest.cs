@@ -38,10 +38,10 @@ namespace T
     internal class PacketDefinition
     {
         [PacketField(Position = 6)]
-        ushort Value { get; set; }
+        public ushort Value { get; set; }
 
         [PacketField(PositionFunction = nameof(GetNextValuePosition))]
-        ushort NextValue { get; set; }
+        public ushort NextValue { get; set; }
 
         public static int GetNextValuePosition(ReadOnlySpan<byte> packetData, int defaultPosition)
         {
@@ -77,7 +77,7 @@ namespace T
     internal class PacketDefinition
     {
         [PacketField]
-        TcpFlags Value { get; set; }
+        public TcpFlags Value { get; set; }
     }
 
     [PacketImplementation(typeof(PacketDefinition))]
@@ -107,7 +107,7 @@ namespace T
     internal class PacketDefinition
     {
         [PacketField(EnumBackingType = typeof(byte))]
-        TcpFlags Value { get; set; }
+        public TcpFlags Value { get; set; }
     }
 
     [PacketImplementation(typeof(PacketDefinition))]
@@ -148,13 +148,13 @@ namespace T
         /// <remarks>
         /// Some extra stuff
         /// </remarks>
-        int Value1 { get; set; }
+        public int Value1 { get; set; }
 
-        HardwareAddress Source { get; set; }
+        public HardwareAddress Source { get; set; }
 
-        HardwareAddress Destination { get; set; }
+        public HardwareAddress Destination { get; set; }
 
-        ushort Value2 { get; set; }
+        public ushort Value2 { get; set; }
     }
 
     [PacketImplementation(typeof(PacketDefinition), IsReadOnly = true)]
@@ -192,15 +192,15 @@ namespace T
         /// <remarks>
         /// Some extra stuff
         /// </remarks>
-        int Value1 { get; set; }
+        public int Value1 { get; set; }
 
         [PacketField(Size = 6)]
-        HardwareAddress Source { get; set; }
+        public HardwareAddress Source { get; set; }
 
         [PacketField(Size = 6)]
-        HardwareAddress Destination { get; set; }
+        public HardwareAddress Destination { get; set; }
 
-        ushort Value2 { get; set; }
+        public ushort Value2 { get; set; }
     }
 
     [PacketImplementation(typeof(PacketDefinition))]
@@ -223,9 +223,9 @@ namespace T
 {
     internal class PacketDefinition
     {
-        int Value1 { get; set; }
+        public int Value1 { get; set; }
 
-        ReadOnlySpan<byte> Payload { get; set; }
+        public ReadOnlySpan<byte> Payload { get; set; }
     }
 
     [PacketImplementation(typeof(PacketDefinition))]
@@ -248,7 +248,7 @@ namespace Enclave.FastPacket
 {
     internal class PacketDefinition
     {
-        int Value1 { get; set; }
+        public int Value1 { get; set; }
     }
 
     [PacketImplementation(typeof(PacketDefinition))]
@@ -258,4 +258,30 @@ namespace Enclave.FastPacket
 }
             ");
     }
+
+    [Fact]
+    public Task CanGenerateTypeWithPrivateMember()
+    {
+        return CompilationVerifier.Verify(@"
+
+using System;
+using Enclave.FastPacket.Generator;
+
+namespace T
+{
+    internal class PacketDefinition
+    {
+        private ushort Value { get; set; }
+
+        public ushort NextValue { get; set; }
+    }
+
+    [PacketImplementation(typeof(PacketDefinition))]
+    public readonly ref partial struct ValueItem
+    {   
+    }
+}
+            ");
+    }
+
 }

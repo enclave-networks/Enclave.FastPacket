@@ -151,5 +151,8 @@ public readonly ref partial struct Ipv4PacketSpan
 [PacketImplementation(typeof(Ipv4Definition), IsReadOnly = true)]
 public readonly ref partial struct ReadOnlyIpv4PacketSpan
 {
+    /// <summary>
+    /// Convert to a readonly representation.
+    /// </summary>
     public static implicit operator ReadOnlyIpv4PacketSpan(Ipv4PacketSpan s) => new ReadOnlyIpv4PacketSpan(s.GetRawData());
 }

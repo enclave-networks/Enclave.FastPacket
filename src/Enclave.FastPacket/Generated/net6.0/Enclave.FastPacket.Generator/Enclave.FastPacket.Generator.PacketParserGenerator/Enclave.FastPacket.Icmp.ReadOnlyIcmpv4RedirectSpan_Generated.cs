@@ -15,11 +15,17 @@ namespace Enclave.FastPacket.Icmp
         /// </summary>
         public const int MinimumSize = sizeof(byte) + sizeof(byte) + sizeof(ushort) + 4;
 
+        /// <summary>
+        /// Create a new instance of <see cref="ReadOnlyIcmpv4RedirectSpan"/>.
+        /// </summary>
         public ReadOnlyIcmpv4RedirectSpan(ReadOnlySpan<byte> packetData)
         {
             _span = packetData;
         }
 
+        /// <summary>
+        /// Gets the raw underlying buffer for this packet.
+        /// </summary>
         public ReadOnlySpan<byte> GetRawData() => _span;
 
         

@@ -27,7 +27,7 @@ namespace T
 {
     internal class PacketDefinition
     {
-        ushort Value { get; set; }
+        public ushort Value { get; set; }
 
         [PacketField(Size = sizeof(byte))]
         struct Union1
@@ -37,7 +37,7 @@ namespace T
             public byte UnionVal2 { get; set; }
         }
 
-        ushort Value2 { get; set; }
+        public ushort Value2 { get; set; }
     }
 
     [PacketImplementation(typeof(PacketDefinition))]
@@ -59,7 +59,7 @@ namespace T
 {
     internal class PacketDefinition
     {
-        ushort Value { get; set; }
+        public ushort Value { get; set; }
 
         [PacketField(Size = sizeof(byte))]
         struct Union1
@@ -71,7 +71,7 @@ namespace T
             public byte UnionVal2 { get; set; }
         }
 
-        ushort Value2 { get; set; }
+        public ushort Value2 { get; set; }
     }
 
     [PacketImplementation(typeof(PacketDefinition))]
@@ -100,7 +100,7 @@ namespace T
     }
     internal class PacketDefinition
     {
-        ushort Value { get; set; }
+        public ushort Value { get; set; }
 
         [PacketField(Size = sizeof(ushort))]
         private struct U3
@@ -112,7 +112,7 @@ namespace T
             public ushort FragmentValue { get; set; }
         }
 
-        ushort Value2 { get; set; }
+        public ushort Value2 { get; set; }
     }
 
     [PacketImplementation(typeof(PacketDefinition))]

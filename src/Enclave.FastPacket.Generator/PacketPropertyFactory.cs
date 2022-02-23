@@ -8,6 +8,7 @@ using Enclave.FastPacket.Generator.PositionProviders;
 using Enclave.FastPacket.Generator.SizeProviders;
 using Enclave.FastPacket.Generator.ValueProviders;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FlowAnalysis;
 
@@ -240,7 +241,9 @@ internal class PacketPropertyFactory
 
         if (positionProvider is not null && valueProvider is not null && sizeProvider is not null)
         {
-            packetProperty = new PacketProperty(propSymbol.Name, options, positionProvider, sizeProvider, valueProvider, docComments);
+            var accessibility = SyntaxFacts.GetText(propSymbol.DeclaredAccessibility);
+
+            packetProperty = new PacketProperty(propSymbol.Name, accessibility, options, positionProvider, sizeProvider, valueProvider, docComments);
             return true;
         }
 

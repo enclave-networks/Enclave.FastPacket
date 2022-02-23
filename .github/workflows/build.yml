@@ -36,8 +36,20 @@ jobs:
 
     - name: Build
       run: dotnet build -c Release /p:Version=${{ steps.gitversion.outputs.SemVer }}
+
+    - name: Push Generator
+      if: github.event_name == 'push'
+      working-directory: src/Enclave.FastPacket.Generator/bin/Release
+      run: |
+        dotnet nuget push *.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json
+                
+    - name: Push FastPacket
+      if: github.event_name == 'push'
+      working-directory: src/Enclave.FastPacket/bin/Release
+      run: |
+        dotnet nuget push *.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json
       
-    - name: Create Release    
+    - name: Create Release
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: actions/create-release@v1
       env:

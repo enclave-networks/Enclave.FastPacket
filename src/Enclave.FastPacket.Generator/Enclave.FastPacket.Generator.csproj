@@ -18,6 +18,7 @@
 	</PropertyGroup>
 
     <PropertyGroup>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Enclave Networks</Authors>
         <Description>Generate fast packet decoders from a packet description..</Description>
         <Copyright>Enclave Networks 2022</Copyright>

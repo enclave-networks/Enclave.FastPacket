@@ -16,11 +16,17 @@ namespace T
         /// </summary>
         public const int MinimumSize = 6 + sizeof(ushort) + sizeof(ushort);
 
+        /// <summary>
+        /// Create a new instance of <see cref="ValueItem"/>.
+        /// </summary>
         public ValueItem(Span<byte> packetData)
         {
             _span = packetData;
         }
 
+        /// <summary>
+        /// Gets the raw underlying buffer for this packet.
+        /// </summary>
         public Span<byte> GetRawData() => _span;
 
         

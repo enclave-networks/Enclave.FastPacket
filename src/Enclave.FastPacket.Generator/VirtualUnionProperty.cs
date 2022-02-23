@@ -29,4 +29,6 @@ internal class VirtualUnionProperty : IPacketProperty
     public IValueProvider ValueProvider => throw new InvalidOperationException("Cannot directly access the value of a union");
 
     public IEnumerable<string> DocComments { get; }
+
+    public string Accessibility => throw new InvalidOperationException("Cannot directly access the accessibility of a union");
 }

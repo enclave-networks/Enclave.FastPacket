@@ -16,11 +16,17 @@ namespace T
         /// </summary>
         public const int MinimumSize = sizeof(int) + T.HardwareAddress.Size + T.HardwareAddress.Size + sizeof(ushort);
 
+        /// <summary>
+        /// Create a new instance of <see cref="PacketParser"/>.
+        /// </summary>
         public PacketParser(ReadOnlySpan<byte> packetData)
         {
             _span = packetData;
         }
 
+        /// <summary>
+        /// Gets the raw underlying buffer for this packet.
+        /// </summary>
         public ReadOnlySpan<byte> GetRawData() => _span;
 
         

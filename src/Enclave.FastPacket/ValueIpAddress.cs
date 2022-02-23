@@ -14,9 +14,19 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
     private readonly long _addr2;
     private readonly AddressFamily _addrFamily;
 
+    /// <summary>
+    /// Length in bytes of an IPv4 Address.
+    /// </summary>
     public const int Ipv4Length = 4;
+
+    /// <summary>
+    /// Length in bytes of an IPv6 Address.
+    /// </summary>
     public const int Ipv6Length = 16;
 
+    /// <summary>
+    /// Create an IPv4 address from a buffer.
+    /// </summary>
     public static ValueIpAddress CreateIpv4(ReadOnlySpan<byte> address)
     {
         if (BinaryPrimitives.TryReadInt32BigEndian(address, out var uintAddr))
@@ -29,6 +39,9 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
         }
     }
 
+    /// <summary>
+    /// Create an IPv6 address from a buffer.
+    /// </summary>
     public static ValueIpAddress CreateIpv6(ReadOnlySpan<byte> address)
     {
         if (BinaryPrimitives.TryReadInt64BigEndian(address, out var addr1) &&
@@ -42,6 +55,9 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
         }
     }
 
+    /// <summary>
+    /// Create a new <see cref="ValueIpAddress"/> from a framework <see cref="IPAddress" />.
+    /// </summary>
     public static ValueIpAddress Create(IPAddress address)
     {
         if (address is null)
@@ -63,6 +79,9 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
         throw new FastPacketException("Invalid address family.", addressBytes);
     }
 
+    /// <summary>
+    /// Create a new <see cref="ValueIpAddress"/> from a buffer.
+    /// </summary>
     public ValueIpAddress(ReadOnlySpan<byte> data)
     {
         if (data.Length > 4)
@@ -87,11 +106,13 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
         _addrFamily = addrFamily;
     }
 
+    /// <inheritdoc />
     public override bool Equals(object? obj)
     {
         return obj is ValueIpAddress address && Equals(address);
     }
 
+    /// <inheritdoc />
     public bool Equals(ValueIpAddress other)
     {
         return _addr1 == other._addr1 &&
@@ -99,11 +120,15 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
                _addrFamily == other._addrFamily;
     }
 
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         return HashCode.Combine(_addr1, _addr2);
     }
 
+    /// <summary>
+    /// Get a normal runtime <see cref="IPAddress"/> from this value type.
+    /// </summary>
     public IPAddress ToIpAddress()
     {
         if (_addrFamily == AddressFamily.InterNetworkV6)
@@ -125,11 +150,14 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
         }
     }
 
+    /// <summary>
+    /// Copy the contents of this IP address to the provided buffer.
+    /// </summary>
     public void CopyTo(Span<byte> destination)
     {
         if (_addrFamily == AddressFamily.InterNetworkV6)
         {
-            if (destination.Length < 16)
+            if (destination.Length < Ipv6Length)
             {
                 throw new FastPacketException("Destination too small for ipv6", destination);
             }
@@ -139,7 +167,7 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
         }
         else
         {
-            if (destination.Length < 4)
+            if (destination.Length < Ipv4Length)
             {
                 throw new FastPacketException("Destination too small for ipv4", destination);
             }
@@ -148,16 +176,23 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
         }
     }
 
+    /// <inheritdoc />
     public override string ToString()
     {
         return ToIpAddress().ToString();
     }
 
+    /// <summary>
+    /// Equals operator.
+    /// </summary>
     public static bool operator ==(ValueIpAddress left, ValueIpAddress right)
     {
         return left.Equals(right);
     }
 
+    /// <summary>
+    /// Not-Equals operator.
+    /// </summary>
     public static bool operator !=(ValueIpAddress left, ValueIpAddress right)
     {
         return !(left == right);
