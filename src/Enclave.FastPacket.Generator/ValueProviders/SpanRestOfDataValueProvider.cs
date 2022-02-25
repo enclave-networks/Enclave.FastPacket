@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator.ValueProviders;
 
-internal class SpanRestOfDataValueProvider : IValueProvider
+internal class SpanRestOfDataValueProvider : ISpanValueProvider
 {
     public SpanRestOfDataValueProvider(INamedTypeSymbol typeSymbol)
     {

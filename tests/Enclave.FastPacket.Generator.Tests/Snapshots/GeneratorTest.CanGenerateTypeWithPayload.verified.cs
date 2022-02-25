@@ -28,7 +28,6 @@ namespace T
         /// Gets the raw underlying buffer for this packet.
         /// </summary>
         public Span<byte> GetRawData() => _span;
-
         
         
         public int Value1
@@ -43,5 +42,14 @@ namespace T
            get => _span.Slice(0 + sizeof(int));
         }
         
+        public override string ToString()
+        {
+            return $"Value1: {Value1}; Payload: {Payload.Length} bytes";
+        }
+
+        public int GetTotalSize()
+        {
+            return 0 + sizeof(int) + _span.Slice(0 + sizeof(int)).Length;
+        }
     }
 }

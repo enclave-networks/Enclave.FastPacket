@@ -28,7 +28,6 @@ namespace Enclave.FastPacket
         /// Gets the raw underlying buffer for this packet.
         /// </summary>
         public Span<byte> GetRawData() => _span;
-
         
         
         public int Value1
@@ -37,5 +36,14 @@ namespace Enclave.FastPacket
            set => BinaryPrimitives.WriteInt32BigEndian(_span.Slice(0), value); 
         }
         
+        public override string ToString()
+        {
+            return $"Value1: {Value1}";
+        }
+
+        public int GetTotalSize()
+        {
+            return 0 + sizeof(int);
+        }
     }
 }

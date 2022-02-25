@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using Enclave.FastPacket.Generator.ValueProviders;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Scriban;
 using Scriban.Runtime;
 
@@ -19,14 +22,32 @@ internal class TemplatedParserBuilder : IParserBuilder
     public string Generate(PacketParserDefinition packetDef, GenerationOptions definitionTypeOptions, INamedTypeSymbol structSymbol, PacketPropertyFactory parserGenerator)
     {
         var sc = new ScriptObject();
+
+        var longestPropName = 0;
+
         sc.Import(new
         {
             Namespace = structSymbol.GetFullNamespace(),
             TypeName = structSymbol.Name,
             Props = packetDef.PropertySet.ToList(),
             MinSizeExpression = packetDef.MinSizeExpression,
+            LongestPropName = longestPropName,
         },
         renamer: m => m.Name);
+
+        Func<string, string> getTotalSizeExpression = (string spanName) =>
+        {
+            if (packetDef.PropertySet.Count == 0)
+            {
+                return "0";
+            }
+
+            var lastPacket = packetDef.PropertySet[packetDef.PropertySet.Count - 1];
+            var positionExpression = lastPacket.PositionProvider.GetPositionExpression(spanName);
+            var sizeExpression = lastPacket.SizeProvider.GetSizeExpression(spanName, positionExpression);
+
+            return $"{positionExpression} + {sizeExpression}";
+        };
 
         Func<IPacketProperty, string, string> getPropGetExpression = (IPacketProperty prop, string spanName)
             => prop.ValueProvider.GetPropGetExpression(spanName, prop.PositionProvider.GetPositionExpression(spanName));
@@ -49,7 +70,7 @@ internal class TemplatedParserBuilder : IParserBuilder
             => prop.Name;
 
         Func<IPacketProperty, string> getPropAccessibility = (IPacketProperty prop)
-            => prop.Accessibility;
+            => SyntaxFacts.GetText(prop.Accessibility);
 
         Func<IPacketProperty, IEnumerable<string>> getPropComments = (IPacketProperty prop)
             => prop.DocComments;
@@ -57,6 +78,55 @@ internal class TemplatedParserBuilder : IParserBuilder
         Func<IPacketProperty, bool> canSet = (IPacketProperty prop)
             => prop.ValueProvider.CanSet;
 
+        Func<string> getToStringFormat = () =>
+        {
+            // Start with a certain capacity in the builder.
+            var builder = new StringBuilder(packetDef.PropertySet.Count * 15);
+
+            builder.Append("$\"");
+
+            var anySoFar = false;
+
+            for (int idx = 0; idx < packetDef.PropertySet.Count; idx++)
+            {
+                var prop = packetDef.PropertySet[idx];
+
+                if (anySoFar)
+                {
+                    builder.Append("; ");
+                }
+
+                if (prop.Accessibility != Accessibility.Public)
+                {
+                    // Don't include private props in the ToString.
+                    continue;
+                }
+
+                anySoFar = true;
+
+                // Add the interpolated string content.
+                builder.Append(prop.Name);
+
+                if (prop.ValueProvider is ISpanValueProvider)
+                {
+                    builder.Append(": {");
+                    builder.Append(prop.Name);
+                    builder.Append(".Length} bytes");
+                }
+                else
+                {
+                    builder.Append(": {");
+                    builder.Append(prop.Name);
+                    builder.Append('}');
+                }
+            }
+
+            builder.Append('"');
+
+            return builder.ToString();
+        };
+
+        sc.Import("getTotalSizeExpression", getTotalSizeExpression);
         sc.Import("getPropGetExpr", getPropGetExpression);
         sc.Import("getPropSetExpr", getPropSetExpression);
         sc.Import("getTypeReferenceName", getTypeReferenceName);
@@ -64,6 +134,7 @@ internal class TemplatedParserBuilder : IParserBuilder
         sc.Import("getPropAccessibility", getPropAccessibility);
         sc.Import("getPropComments", getPropComments);
         sc.Import("canSet", canSet);
+        sc.Import("getToStringFormat", getToStringFormat);
 
         return _template.Render(new TemplateContext(sc));
     }

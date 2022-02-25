@@ -28,7 +28,6 @@ namespace T
         /// Gets the raw underlying buffer for this packet.
         /// </summary>
         public Span<byte> GetRawData() => _span;
-
         
         
         public T.TcpFlags Value
@@ -37,5 +36,14 @@ namespace T
            set => BinaryPrimitives.WriteInt32BigEndian(_span.Slice(0), (int)(value)); 
         }
         
+        public override string ToString()
+        {
+            return $"Value: {Value}";
+        }
+
+        public int GetTotalSize()
+        {
+            return 0 + sizeof(int);
+        }
     }
 }

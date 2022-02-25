@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Enclave.FastPacket.Generator.PositionProviders;
 using Enclave.FastPacket.Generator.SizeProviders;
 using Enclave.FastPacket.Generator.ValueProviders;
+using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator;
 
@@ -30,5 +31,5 @@ internal class VirtualUnionProperty : IPacketProperty
 
     public IEnumerable<string> DocComments { get; }
 
-    public string Accessibility => throw new InvalidOperationException("Cannot directly access the accessibility of a union");
+    public Accessibility Accessibility => throw new InvalidOperationException("Cannot directly access the accessibility of a union");
 }

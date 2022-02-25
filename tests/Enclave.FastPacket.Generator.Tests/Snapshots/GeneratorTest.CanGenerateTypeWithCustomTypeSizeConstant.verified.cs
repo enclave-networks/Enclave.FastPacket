@@ -28,7 +28,6 @@ namespace T
         /// Gets the raw underlying buffer for this packet.
         /// </summary>
         public ReadOnlySpan<byte> GetRawData() => _span;
-
         
         
         /// <summary> This is value 1 </summary>
@@ -58,5 +57,14 @@ namespace T
            get => BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0 + sizeof(int) + T.HardwareAddress.Size + T.HardwareAddress.Size));
         }
         
+        public override string ToString()
+        {
+            return $"Value1: {Value1}; Source: {Source}; Destination: {Destination}; Value2: {Value2}";
+        }
+
+        public int GetTotalSize()
+        {
+            return 0 + sizeof(int) + T.HardwareAddress.Size + T.HardwareAddress.Size + sizeof(ushort);
+        }
     }
 }

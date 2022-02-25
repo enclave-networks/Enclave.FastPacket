@@ -28,7 +28,6 @@ namespace T
         /// Gets the raw underlying buffer for this packet.
         /// </summary>
         public Span<byte> GetRawData() => _span;
-
         
         
         public System.Span<byte> Value
@@ -48,5 +47,14 @@ namespace T
            get => _span.Slice(0 + T.PacketDefinition.ValueFunc(_span, 0) + T.PacketDefinition.Value2Func(_span));
         }
         
+        public override string ToString()
+        {
+            return $"Value: {Value.Length} bytes; Value2: {Value2.Length} bytes; Remaining: {Remaining.Length} bytes";
+        }
+
+        public int GetTotalSize()
+        {
+            return 0 + T.PacketDefinition.ValueFunc(_span, 0) + T.PacketDefinition.Value2Func(_span) + _span.Slice(0 + T.PacketDefinition.ValueFunc(_span, 0) + T.PacketDefinition.Value2Func(_span)).Length;
+        }
     }
 }

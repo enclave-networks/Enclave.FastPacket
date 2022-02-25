@@ -28,7 +28,6 @@ namespace T
         /// Gets the raw underlying buffer for this packet.
         /// </summary>
         public Span<byte> GetRawData() => _span;
-
         
         
         public ushort Value
@@ -37,5 +36,14 @@ namespace T
            set => BinaryPrimitives.WriteUInt16BigEndian(_span.Slice(0), value); 
         }
         
+        public override string ToString()
+        {
+            return $"Value: {Value}";
+        }
+
+        public int GetTotalSize()
+        {
+            return 0 + sizeof(ushort);
+        }
     }
 }

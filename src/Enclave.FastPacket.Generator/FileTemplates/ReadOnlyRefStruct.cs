@@ -27,7 +27,6 @@ namespace {{Namespace}}
         /// Gets the raw underlying buffer for this packet.
         /// </summary>
         public ReadOnlySpan<byte> GetRawData() => _span;
-
         {{ for prop in Props }}
         {{ for comment in (getPropComments prop) }}
         /// {{ comment }}{{ end }}
@@ -36,5 +35,14 @@ namespace {{Namespace}}
            get => {{ getPropGetExpr prop "_span" }};
         }
         {{ end }}
+        public override string ToString()
+        {
+            return {{ getToStringFormat }};
+        }
+
+        public int GetTotalSize()
+        {
+            return {{ getTotalSizeExpression "_span" }};
+        }
     }
 }

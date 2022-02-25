@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator.ValueProviders;
 
-internal class SpanKnownSizeValueProvider : IValueProvider
+internal class SpanKnownSizeValueProvider : ISpanValueProvider
 {
     private readonly ISizeProvider _sizeProvider;
 

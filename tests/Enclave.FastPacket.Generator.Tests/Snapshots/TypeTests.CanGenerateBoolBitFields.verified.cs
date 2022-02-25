@@ -14,7 +14,7 @@ namespace T
         /// Defines the minimum possible size of this packet, given all
         /// known fixed sizes.
         /// </summary>
-        public const int MinimumSize = sizeof(ushort) + sizeof(ushort);
+        public const int MinimumSize = sizeof(ushort) + 1 + sizeof(ushort);
 
         /// <summary>
         /// Create a new instance of <see cref="ValueItem"/>.
@@ -30,27 +30,41 @@ namespace T
         public Span<byte> GetRawData() => _span;
         
         
-        private ushort Value
+        public ushort Value
         {
            get => BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0));
            set => BinaryPrimitives.WriteUInt16BigEndian(_span.Slice(0), value); 
         }
         
         
-        public ushort NextValue
+        public bool Value1
         {
-           get => BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0 + sizeof(ushort)));
-           set => BinaryPrimitives.WriteUInt16BigEndian(_span.Slice(0 + sizeof(ushort)), value); 
+           get => ((byte)((_span[0 + sizeof(ushort)] & 0x80u) >> 7)) > 0;
+           set => _span[0 + sizeof(ushort)] = (byte)((((value ? 1 : 0) << 7) & 0x80u) | (byte)(_span[0 + sizeof(ushort)] & ~0x80u)); 
+        }
+        
+        
+        public bool UnionVal2
+        {
+           get => ((byte)((_span[0 + sizeof(ushort)] & 0x40u) >> 6)) > 0;
+           set => _span[0 + sizeof(ushort)] = (byte)((((value ? 1 : 0) << 6) & 0x40u) | (byte)(_span[0 + sizeof(ushort)] & ~0x40u)); 
+        }
+        
+        
+        public ushort Value2
+        {
+           get => BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0 + sizeof(ushort) + 1));
+           set => BinaryPrimitives.WriteUInt16BigEndian(_span.Slice(0 + sizeof(ushort) + 1), value); 
         }
         
         public override string ToString()
         {
-            return $"NextValue: {NextValue}";
+            return $"Value: {Value}; Value1: {Value1}; UnionVal2: {UnionVal2}; Value2: {Value2}";
         }
 
         public int GetTotalSize()
         {
-            return 0 + sizeof(ushort) + sizeof(ushort);
+            return 0 + sizeof(ushort) + 1 + sizeof(ushort);
         }
     }
 }

@@ -2,6 +2,7 @@
 using Enclave.FastPacket.Generator.PositionProviders;
 using Enclave.FastPacket.Generator.SizeProviders;
 using Enclave.FastPacket.Generator.ValueProviders;
+using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator;
 
@@ -9,7 +10,7 @@ internal class PacketProperty : IPacketProperty
 {
     public PacketProperty(
         string name,
-        string accessibility,
+        Accessibility accessibility,
         PacketFieldOptions options,
         IPositionProvider positionProvider,
         ISizeProvider sizeProvider,
@@ -26,7 +27,7 @@ internal class PacketProperty : IPacketProperty
 
     public string Name { get; }
 
-    public string Accessibility { get; }
+    public Accessibility Accessibility { get; }
 
     public IPositionProvider PositionProvider { get; }
 

@@ -159,8 +159,16 @@ internal class PacketPropertyFactory
 
                 if (!SymbolEqualityComparer.Default.Equals(readType, propType))
                 {
-                    // Cast it.
-                    valueProvider = new CastingValueProvider(propType, valueProvider);
+                    // Is boolean?
+                    if (SymbolEqualityComparer.Default.Equals(propType, GetSpecialType(SpecialType.System_Boolean)))
+                    {
+                        valueProvider = new BoolFromNumberValueProvider(propType, valueProvider);
+                    }
+                    else
+                    {
+                        // Cast it.
+                        valueProvider = new CastingValueProvider(propType, valueProvider);
+                    }
                 }
             }
             else if (propType.EnumUnderlyingType is not null)
@@ -202,7 +210,7 @@ internal class PacketPropertyFactory
                     if (isLast)
                     {
                         valueProvider = _remainingSpanValueProvider;
-                        sizeProvider ??= UnknownSizeProvider.Instance;
+                        sizeProvider ??= SpanRemainingLengthSizeProvider.Instance;
                     }
                     else
                     {
@@ -241,9 +249,7 @@ internal class PacketPropertyFactory
 
         if (positionProvider is not null && valueProvider is not null && sizeProvider is not null)
         {
-            var accessibility = SyntaxFacts.GetText(propSymbol.DeclaredAccessibility);
-
-            packetProperty = new PacketProperty(propSymbol.Name, accessibility, options, positionProvider, sizeProvider, valueProvider, docComments);
+            packetProperty = new PacketProperty(propSymbol.Name, propSymbol.DeclaredAccessibility, options, positionProvider, sizeProvider, valueProvider, docComments);
             return true;
         }
 
@@ -396,34 +402,42 @@ internal class PacketPropertyFactory
                 return false;
             }
 
-            if (packetFieldBitsAttr.ConstructorArguments.Length == 2)
+            var constructArgs = packetFieldBitsAttr.ConstructorArguments;
+
+            if (constructArgs.Length > 0)
             {
-                if (TryGetIntArg(packetFieldBitsAttr.ConstructorArguments[0], out var firstBit) &&
-                    TryGetIntArg(packetFieldBitsAttr.ConstructorArguments[1], out var lastBit))
+                if (TryGetIntArg(constructArgs[0], out var firstBit))
                 {
-                    if (lastBit >= firstBit)
+                    var lastBit = firstBit;
+
+                    // If we've either got only 1 constructor arg, or we've got a second "last" bit.
+                    if (constructArgs.Length == 1 || TryGetIntArg(packetFieldBitsAttr.ConstructorArguments[1], out lastBit))
                     {
-                        // Intentional int arithmetic, only care about the whole bytes.
-                        var numberOfWholeBytes = lastBit / 8;
-
-                        var lastBitInMask = (8 * (numberOfWholeBytes + 1)) - 1;
-
-                        // Generate the bitmask for MSB0 designation.
-                        // This is when we invert the bit order.
-                        ulong bitMask = 0;
-
-                        for (int bitPos = lastBitInMask - firstBit; bitPos >= lastBitInMask - lastBit; bitPos--)
+                        if (lastBit >= firstBit)
                         {
-                            bitMask |= 1UL << bitPos;
-                        }
+                            // Intentional int arithmetic, only care about the whole bytes.
+                            var numberOfWholeBytes = lastBit / 8;
 
-                        options.Bitmask = bitMask;
-                    }
-                    else
-                    {
-                        // Raise a diagnostic.
+                            var lastBitInMask = (8 * (numberOfWholeBytes + 1)) - 1;
+
+                            // Generate the bitmask for MSB0 designation.
+                            // This is when we invert the bit order.
+                            ulong bitMask = 0;
+
+                            for (int bitPos = lastBitInMask - firstBit; bitPos >= lastBitInMask - lastBit; bitPos--)
+                            {
+                                bitMask |= 1UL << bitPos;
+                            }
+
+                            options.Bitmask = bitMask;
+                        }
+                        else
+                        {
+                            // Raise a diagnostic.
+                        }
                     }
                 }
+
             }
         }
 
