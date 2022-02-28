@@ -2,8 +2,8 @@
 
 The FastPacket project provides efficient, zero-allocation mechanisms for reading and writing individual network packets.
 
-![Github Actions](https://github.com/enclave-networks/Enclave.FastPacket/actions/workflows/build.yml/badge.svg?branch=develop)
-![NuGet](https://img.shields.io/nuget/v/Enclave.FastPacket.svg)](https://nuget.org/packages/Enclave.FastPacket)
+[![Github Actions](https://github.com/enclave-networks/Enclave.FastPacket/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/enclave-networks/Enclave.FastPacket/actions)
+[![NuGet](https://img.shields.io/nuget/v/Enclave.FastPacket.svg)](https://nuget.org/packages/Enclave.FastPacket)
 
 > The library is currently pre-release as we work on tests and more protocol support.
 
@@ -442,7 +442,7 @@ struct MyPacketDefinition
 
 Once that definition gets converted to an implementation, those properties will be flattened into a single entry that looks a bit like:
 
-```
+```csharp
 [PacketImplementation(typeof(MyPacketDefinition))]
 readonly ref partial struct MyPacketImplementation
 {

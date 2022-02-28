@@ -67,6 +67,7 @@ internal ref struct Ipv6Definition
 [PacketImplementation(typeof(Ipv6Definition))]
 public readonly ref partial struct Ipv6PacketSpan
 {
+    public Ipv6ExtensionVisitor GetExtensionVisitor() => new Ipv6ExtensionVisitor(this, Payload);
 }
 
 /// <summary>
@@ -75,6 +76,8 @@ public readonly ref partial struct Ipv6PacketSpan
 [PacketImplementation(typeof(Ipv6Definition), IsReadOnly = true)]
 public readonly ref partial struct ReadOnlyIpv6PacketSpan
 {
+    public Ipv6ExtensionVisitor GetExtensionVisitor() => new Ipv6ExtensionVisitor(this, Payload);
+
     /// <summary>
     /// Convert to a readonly representation.
     /// </summary>

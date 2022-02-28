@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Sockets;
+using System.Text;
 using Enclave.FastPacket.Generator;
 
 namespace Enclave.FastPacket;

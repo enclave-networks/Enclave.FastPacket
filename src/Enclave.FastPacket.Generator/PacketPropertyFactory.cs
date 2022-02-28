@@ -437,7 +437,6 @@ internal class PacketPropertyFactory
                         }
                     }
                 }
-
             }
         }
 

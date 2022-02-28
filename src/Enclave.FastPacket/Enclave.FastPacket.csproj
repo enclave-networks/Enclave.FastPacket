@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.1;net5.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.1</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <PackageId>Enclave.FastPacket</PackageId>
         <Version>1.0.0</Version>
@@ -16,7 +16,6 @@
         <PackageProjectUrl>https://github.com/enclave-networks/Enclave.FastPacket</PackageProjectUrl>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/enclave-networks/Enclave.FastPacket</RepositoryUrl>
-        <RepositoryType>GitHub</RepositoryType>
         <PackageTags>ethernet, network</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>

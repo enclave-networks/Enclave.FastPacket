@@ -27,7 +27,6 @@ namespace Enclave.FastPacket
         /// Gets the raw underlying buffer for this packet.
         /// </summary>
         public Span<byte> GetRawData() => _span;
-
         
         
         /// <summary>
@@ -119,5 +118,14 @@ namespace Enclave.FastPacket
            set => value.CopyTo(_span.Slice(0 + sizeof(ushort) + sizeof(ushort) + sizeof(byte) + sizeof(byte) + sizeof(ushort) + Enclave.FastPacket.HardwareAddress.Size + 4 + Enclave.FastPacket.HardwareAddress.Size, 4)); 
         }
         
+        public override string ToString()
+        {
+            return $"HardwareType: {HardwareType}; ProtocolType: {ProtocolType}; HardwareAddressLength: {HardwareAddressLength}; ProtocolAddressLength: {ProtocolAddressLength}; Operation: {Operation}; SenderHardwareAddress: {SenderHardwareAddress}; SenderProtocolAddress: {SenderProtocolAddress}; TargetHardwareAddress: {TargetHardwareAddress}; TargetProtocolAddress: {TargetProtocolAddress}";
+        }
+
+        public int GetTotalSize()
+        {
+            return 0 + sizeof(ushort) + sizeof(ushort) + sizeof(byte) + sizeof(byte) + sizeof(ushort) + Enclave.FastPacket.HardwareAddress.Size + 4 + Enclave.FastPacket.HardwareAddress.Size + 4;
+        }
     }
 }

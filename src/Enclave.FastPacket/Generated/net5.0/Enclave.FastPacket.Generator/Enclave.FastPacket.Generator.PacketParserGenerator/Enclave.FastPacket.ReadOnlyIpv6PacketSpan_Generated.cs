@@ -27,7 +27,6 @@ namespace Enclave.FastPacket
         /// Gets the raw underlying buffer for this packet.
         /// </summary>
         public ReadOnlySpan<byte> GetRawData() => _span;
-
         
         
         /// <summary>
@@ -110,5 +109,14 @@ namespace Enclave.FastPacket
            get => _span.Slice(0 + 4 + sizeof(ushort) + sizeof(byte) + sizeof(byte) + 16 + 16);
         }
         
+        public override string ToString()
+        {
+            return $"Version: {Version}; TrafficClass: {TrafficClass}; FlowLabel: {FlowLabel}; PayloadLength: {PayloadLength}; NextHeader: {NextHeader}; HopLimit: {HopLimit}; Source: {Source}; Destination: {Destination}; Payload: {Payload.Length} bytes";
+        }
+
+        public int GetTotalSize()
+        {
+            return 0 + 4 + sizeof(ushort) + sizeof(byte) + sizeof(byte) + 16 + 16 + _span.Slice(0 + 4 + sizeof(ushort) + sizeof(byte) + sizeof(byte) + 16 + 16).Length;
+        }
     }
 }

@@ -1,4 +1,4 @@
-name: SDK API Build
+name: FastPacket Build
 
 on:
   push:

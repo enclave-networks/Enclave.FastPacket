@@ -27,7 +27,6 @@ namespace Enclave.FastPacket
         /// Gets the raw underlying buffer for this packet.
         /// </summary>
         public ReadOnlySpan<byte> GetRawData() => _span;
-
         
         
         /// <summary>
@@ -170,5 +169,14 @@ namespace Enclave.FastPacket
            get => _span.Slice(0 + 1 + sizeof(byte) + sizeof(ushort) + sizeof(ushort) + 2 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + 4 + 4 + Enclave.FastPacket.Ipv4Definition.GetOptionsSize(_span));
         }
         
+        public override string ToString()
+        {
+            return $"Version: {Version}; IHL: {IHL}; Dscp: {Dscp}; TotalLength: {TotalLength}; Identification: {Identification}; FragmentFlags: {FragmentFlags}; FragmentOffset: {FragmentOffset}; Ttl: {Ttl}; Protocol: {Protocol}; HeaderChecksum: {HeaderChecksum}; Source: {Source}; Destination: {Destination}; Options: {Options.Length} bytes; Payload: {Payload.Length} bytes";
+        }
+
+        public int GetTotalSize()
+        {
+            return 0 + 1 + sizeof(byte) + sizeof(ushort) + sizeof(ushort) + 2 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + 4 + 4 + Enclave.FastPacket.Ipv4Definition.GetOptionsSize(_span) + _span.Slice(0 + 1 + sizeof(byte) + sizeof(ushort) + sizeof(ushort) + 2 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + 4 + 4 + Enclave.FastPacket.Ipv4Definition.GetOptionsSize(_span)).Length;
+        }
     }
 }
