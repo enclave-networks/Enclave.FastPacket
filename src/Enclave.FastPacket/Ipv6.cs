@@ -1,5 +1,6 @@
 ﻿using System;
 using Enclave.FastPacket.Generator;
+using Enclave.FastPacket.Ipv6Extensions;
 
 namespace Enclave.FastPacket;
 
@@ -67,7 +68,10 @@ internal ref struct Ipv6Definition
 [PacketImplementation(typeof(Ipv6Definition))]
 public readonly ref partial struct Ipv6PacketSpan
 {
-    public Ipv6ExtensionVisitor GetExtensionVisitor() => new Ipv6ExtensionVisitor(this, Payload);
+    /// <summary>
+    /// Access a visitor for the IPv6 Extensions.
+    /// </summary>
+    public Ipv6ExtensionVisitor Extensions => new Ipv6ExtensionVisitor(this);
 }
 
 /// <summary>
@@ -76,7 +80,10 @@ public readonly ref partial struct Ipv6PacketSpan
 [PacketImplementation(typeof(Ipv6Definition), IsReadOnly = true)]
 public readonly ref partial struct ReadOnlyIpv6PacketSpan
 {
-    public Ipv6ExtensionVisitor GetExtensionVisitor() => new Ipv6ExtensionVisitor(this, Payload);
+    /// <summary>
+    /// Access a visitor for the IPv6 Extensions.
+    /// </summary>
+    public Ipv6ExtensionVisitor Extensions => new Ipv6ExtensionVisitor(this);
 
     /// <summary>
     /// Convert to a readonly representation.

@@ -67,11 +67,17 @@ namespace Enclave.FastPacket
            get => _span.Slice(0 + Enclave.FastPacket.HardwareAddress.Size + Enclave.FastPacket.HardwareAddress.Size + sizeof(ushort));
         }
         
+        /// <summary>
+        /// Get a string representation of this packet.
+        /// </summary>
         public override string ToString()
         {
             return $"Destination: {Destination}; Source: {Source}; Type: {Type}; Payload: {Payload.Length} bytes";
         }
 
+        /// <summary>
+        /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
+        /// </summary>
         public int GetTotalSize()
         {
             return 0 + Enclave.FastPacket.HardwareAddress.Size + Enclave.FastPacket.HardwareAddress.Size + sizeof(ushort) + _span.Slice(0 + Enclave.FastPacket.HardwareAddress.Size + Enclave.FastPacket.HardwareAddress.Size + sizeof(ushort)).Length;

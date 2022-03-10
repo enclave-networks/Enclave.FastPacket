@@ -27,9 +27,11 @@ namespace Enclave.FastPacket.Icmp
         /// Gets the raw underlying buffer for this packet.
         /// </summary>
         public Span<byte> GetRawData() => _span;
-
         
         
+        /// <summary>
+        /// Indicates the type of the ICMP packet.
+        /// </summary>
         public Enclave.FastPacket.Icmpv4Types Type
         {
            get => (Enclave.FastPacket.Icmpv4Types)(_span[0]);
@@ -37,6 +39,9 @@ namespace Enclave.FastPacket.Icmp
         }
         
         
+        /// <summary>
+        /// The redirect code.
+        /// </summary>
         public Enclave.FastPacket.Icmp.Icmpv4RedirectCodes Code
         {
            get => (Enclave.FastPacket.Icmp.Icmpv4RedirectCodes)(_span[0 + sizeof(byte)]);
@@ -44,6 +49,9 @@ namespace Enclave.FastPacket.Icmp
         }
         
         
+        /// <summary>
+        /// The checksum.
+        /// </summary>
         public ushort Checksum
         {
            get => BinaryPrimitives.ReadUInt16BigEndian(_span.Slice(0 + sizeof(byte) + sizeof(byte)));
@@ -51,6 +59,9 @@ namespace Enclave.FastPacket.Icmp
         }
         
         
+        /// <summary>
+        /// The IPv4 address to redirect to.
+        /// </summary>
         public Enclave.FastPacket.ValueIpAddress IpAddress
         {
            get => new Enclave.FastPacket.ValueIpAddress(_span.Slice(0 + sizeof(byte) + sizeof(byte) + sizeof(ushort), 4));
@@ -58,10 +69,28 @@ namespace Enclave.FastPacket.Icmp
         }
         
         
+        /// <summary>
+        /// The original IP Header and datagram.
+        /// </summary>
         public System.Span<byte> IpHeaderAndDatagram
         {
            get => _span.Slice(0 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + 4);
         }
         
+        /// <summary>
+        /// Get a string representation of this packet.
+        /// </summary>
+        public override string ToString()
+        {
+            return $"Type: {Type}; Code: {Code}; Checksum: {Checksum}; IpAddress: {IpAddress}; IpHeaderAndDatagram: {IpHeaderAndDatagram.Length} bytes";
+        }
+
+        /// <summary>
+        /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
+        /// </summary>
+        public int GetTotalSize()
+        {
+            return 0 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + 4 + _span.Slice(0 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + 4).Length;
+        }
     }
 }

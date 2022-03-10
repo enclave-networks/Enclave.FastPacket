@@ -4,6 +4,7 @@ using System;
 using System.Net;
 using FluentAssertions;
 using System.Buffers.Binary;
+using Enclave.FastPacket.Ipv6Extensions;
 
 namespace Enclave.FastPacket.Tests;
 
@@ -92,9 +93,7 @@ public class Ipv6Tests
         myIp.Source.ToIpAddress().Should().Be(sourceIp);
         myIp.Destination.ToIpAddress().Should().Be(destIp);
 
-        var visitor = myIp.GetExtensionVisitor();
-
-        visitor.GetActualPayload(out var payloadSpan, out var protocol);
+        myIp.Extensions.GetActualPayload(out var protocol, out var payloadSpan);
 
         Assert.Equal(IpProtocol.Udp, protocol);
 
@@ -133,19 +132,19 @@ public class Ipv6Tests
         var protocolVisitor = new HopByHopVisitor();
 
         var visitCount = 0;
-        ipv6.GetExtensionVisitor().Visit(protocolVisitor, ref visitCount);
+        var result = ipv6.Extensions.Visit(protocolVisitor, visitCount);
 
-        Assert.Equal(1, visitCount);
+        Assert.Equal(1, result.VisitorState);
     }
 
     private class HopByHopVisitor : IIpv6ExtensionVisitor<int>
     {
-        public void VisitIpv6FragmentExtension(ref int state, IpProtocol protocol, ReadOnlyIpv6FragmentExtensionSpan span)
+        public int VisitIpv6FragmentExtension(in int state, IpProtocol protocol, ReadOnlyIpv6FragmentExtensionSpan span, ref bool stopVisiting)
         {
             throw new NotImplementedException();
         }
 
-        public void VisitIpv6HopByHopAndDestinationExtension(ref int state, IpProtocol protocol, ReadOnlyIpv6HopByHopAndDestinationExtensionSpan span)
+        public int VisitIpv6HopByHopAndDestinationExtension(in int state, IpProtocol protocol, ReadOnlyIpv6HopByHopAndDestinationExtensionSpan span, ref bool stopVisiting)
         {
             Assert.Equal(IpProtocol.IPv6HopByHopOptions, protocol);
             Assert.Equal(IpProtocol.IcmpV6, span.NextHeader);
@@ -154,10 +153,10 @@ public class Ipv6Tests
             Assert.Equal(0x05, span.OptionsAndPadding[0]);
             Assert.Equal(0x02, span.OptionsAndPadding[1]);
 
-            state++;
+            return state + 1;
         }
 
-        public void VisitIpv6RoutingExtension(ref int state, IpProtocol protocol, ReadOnlyIpv6RoutingExtensionSpan span)
+        public int VisitIpv6RoutingExtension(in int state, IpProtocol protocol, ReadOnlyIpv6RoutingExtensionSpan span, ref bool stopVisiting)
         {
             throw new NotImplementedException();
         }

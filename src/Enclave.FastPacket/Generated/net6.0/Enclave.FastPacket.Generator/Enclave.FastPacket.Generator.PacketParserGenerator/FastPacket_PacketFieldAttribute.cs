@@ -70,6 +70,17 @@ namespace Enclave.FastPacket.Generator
             LastBit = lastBit;
         }
 
+        /// <summary>
+        /// Define a packet field that consumes a single bit within the read value.
+        /// Bit numbers are specified using MSB 0 bit-numbering, to match most network packet RFCs.
+        /// </summary>
+        /// <param name="bit">The bit to include in the value (e.g. 0)</param>
+        public PacketFieldBitsAttribute(uint bit)
+        {
+            FirstBit = bit;
+            LastBit = bit;
+        }
+
         public uint FirstBit { get; }
 
         public uint LastBit { get; }

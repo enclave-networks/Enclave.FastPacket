@@ -36,11 +36,17 @@ namespace {{Namespace}}
            set => {{ getPropSetExpr prop "_span" "value" }}; {{ end }}
         }
         {{ end }}
+        /// <summary>
+        /// Get a string representation of this packet.
+        /// </summary>
         public override string ToString()
         {
             return {{ getToStringFormat }};
         }
 
+        /// <summary>
+        /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
+        /// </summary>
         public int GetTotalSize()
         {
             return {{ getTotalSizeExpression "_span" }};

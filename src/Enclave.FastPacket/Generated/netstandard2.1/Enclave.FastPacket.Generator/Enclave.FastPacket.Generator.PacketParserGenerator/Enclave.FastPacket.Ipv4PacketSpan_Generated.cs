@@ -181,11 +181,17 @@ namespace Enclave.FastPacket
            get => _span.Slice(0 + 1 + sizeof(byte) + sizeof(ushort) + sizeof(ushort) + 2 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + 4 + 4 + Enclave.FastPacket.Ipv4Definition.GetOptionsSize(_span));
         }
         
+        /// <summary>
+        /// Get a string representation of this packet.
+        /// </summary>
         public override string ToString()
         {
             return $"Version: {Version}; IHL: {IHL}; Dscp: {Dscp}; TotalLength: {TotalLength}; Identification: {Identification}; FragmentFlags: {FragmentFlags}; FragmentOffset: {FragmentOffset}; Ttl: {Ttl}; Protocol: {Protocol}; HeaderChecksum: {HeaderChecksum}; Source: {Source}; Destination: {Destination}; Options: {Options.Length} bytes; Payload: {Payload.Length} bytes";
         }
 
+        /// <summary>
+        /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
+        /// </summary>
         public int GetTotalSize()
         {
             return 0 + 1 + sizeof(byte) + sizeof(ushort) + sizeof(ushort) + 2 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + 4 + 4 + Enclave.FastPacket.Ipv4Definition.GetOptionsSize(_span) + _span.Slice(0 + 1 + sizeof(byte) + sizeof(ushort) + sizeof(ushort) + 2 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + 4 + 4 + Enclave.FastPacket.Ipv4Definition.GetOptionsSize(_span)).Length;

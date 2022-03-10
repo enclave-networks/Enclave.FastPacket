@@ -117,11 +117,17 @@ namespace Enclave.FastPacket
            get => _span.Slice(0 + 4 + sizeof(ushort) + sizeof(byte) + sizeof(byte) + 16 + 16);
         }
         
+        /// <summary>
+        /// Get a string representation of this packet.
+        /// </summary>
         public override string ToString()
         {
             return $"Version: {Version}; TrafficClass: {TrafficClass}; FlowLabel: {FlowLabel}; PayloadLength: {PayloadLength}; NextHeader: {NextHeader}; HopLimit: {HopLimit}; Source: {Source}; Destination: {Destination}; Payload: {Payload.Length} bytes";
         }
 
+        /// <summary>
+        /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
+        /// </summary>
         public int GetTotalSize()
         {
             return 0 + 4 + sizeof(ushort) + sizeof(byte) + sizeof(byte) + 16 + 16 + _span.Slice(0 + 4 + sizeof(ushort) + sizeof(byte) + sizeof(byte) + 16 + 16).Length;

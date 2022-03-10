@@ -1,70 +1,101 @@
 ﻿using System;
 
-namespace Enclave.FastPacket;
+namespace Enclave.FastPacket.Ipv6Extensions;
 
-public readonly ref struct VisitResult<TVisitorState>
-{
-    public VisitResult(ref TVisitorState visitorState, int lengthConsumed, int lengthRemaining)
-    {
-        VisitorState = visitorState;
-        LengthConsumed = lengthConsumed;
-        LengthRemaining = lengthRemaining;
-    }
-
-    public TVisitorState VisitorState { get; }
-
-    public int LengthConsumed { get; }
-
-    public int LengthRemaining { get; }
-}
-
+/// <summary>
+/// Defines an interface for a visitor type for IPv6 Extensions, that is invoked for each extension structure found in an IPv6 packet.
+/// </summary>
+/// <typeparam name="TState">A state object.</typeparam>
 public interface IIpv6ExtensionVisitor<TState>
 {
-    void VisitIpv6HopByHopAndDestinationExtension(ref TState state, IpProtocol protocol, ReadOnlyIpv6HopByHopAndDestinationExtensionSpan span);
+    /// <summary>
+    /// Invoked when a Hop by Hop or Destination extension structure is found.
+    /// </summary>
+    /// <param name="state">The current visitor state.</param>
+    /// <param name="protocol">The protocol value for this extension, as reported by the previous NextHeader value.</param>
+    /// <param name="span">The decoded packet.</param>
+    /// <param name="stopVisiting">If set to true by the invoked method, stop the visitor early.</param>
+    /// <returns>The new visitor state.</returns>
+    TState VisitIpv6HopByHopAndDestinationExtension(in TState state, IpProtocol protocol, ReadOnlyIpv6HopByHopAndDestinationExtensionSpan span, ref bool stopVisiting);
 
-    void VisitIpv6RoutingExtension(ref TState state, IpProtocol protocol, ReadOnlyIpv6RoutingExtensionSpan span);
+    /// <summary>
+    /// Invoked when an IPv6 Routing extension is found.
+    /// </summary>
+    /// <param name="state">The current visitor state.</param>
+    /// <param name="protocol">The protocol value for this extension, as reported by the previous NextHeader value.</param>
+    /// <param name="span">The decoded packet.</param>
+    /// <param name="stopVisiting">If set to true by the invoked method, stop the visitor early.</param>
+    /// <returns>The new visitor state.</returns>
+    TState VisitIpv6RoutingExtension(in TState state, IpProtocol protocol, ReadOnlyIpv6RoutingExtensionSpan span, ref bool stopVisiting);
 
-    void VisitIpv6FragmentExtension(ref TState state, IpProtocol protocol, ReadOnlyIpv6FragmentExtensionSpan span);
+    /// <summary>
+    /// Invoked when an IPv6 fragment extension is found.
+    /// </summary>
+    /// <param name="state">The current visitor state.</param>
+    /// <param name="protocol">The protocol value for this extension, as reported by the previous NextHeader value.</param>
+    /// <param name="span">The decoded packet.</param>
+    /// <param name="stopVisiting">If set to true by the invoked method, stop the visitor early.</param>
+    /// <returns>The new visitor state.</returns>
+    TState VisitIpv6FragmentExtension(in TState state, IpProtocol protocol, ReadOnlyIpv6FragmentExtensionSpan span, ref bool stopVisiting);
 }
 
+/// <summary>
+/// Provides a visitor pattern for IPv6 Extensions.
+/// </summary>
 public readonly ref struct Ipv6ExtensionVisitor
 {
     private readonly ReadOnlyIpv6PacketSpan _outerPacket;
-    private readonly ReadOnlySpan<byte> _availableBuffer;
 
-    public Ipv6ExtensionVisitor(ReadOnlyIpv6PacketSpan outerPacket, ReadOnlySpan<byte> availableBuffer)
+    /// <summary>
+    /// Create a new instance of <see cref="Ipv6ExtensionVisitor"/>.
+    /// </summary>
+    /// <param name="outerPacket">The IPv6 Packet that contains the extensions.</param>
+    public Ipv6ExtensionVisitor(ReadOnlyIpv6PacketSpan outerPacket)
     {
         _outerPacket = outerPacket;
-        _availableBuffer = availableBuffer;
     }
 
+    /// <summary>
+    /// Get the total size of all the IPv6 Extensions that are present.
+    /// </summary>
     public int GetSize()
     {
-        var finalProtocol = IpProtocol.IPv6NoNextHeader;
-        var visitResult = Visit(NextProtocolCapturingVisitor.Instance, ref finalProtocol);
+        var visitResult = Visit(NextProtocolCapturingVisitor.Instance, IpProtocol.IPv6NoNextHeader);
 
         return visitResult.LengthConsumed;
     }
 
-    public void GetActualPayload(out ReadOnlySpan<byte> payload, out IpProtocol payloadProtocol)
+    /// <summary>
+    /// Get the "actual" protocol type and payload, after all IPv6 Extensions.
+    /// </summary>
+    public void GetActualPayload(out IpProtocol payloadProtocol, out ReadOnlySpan<byte> payload)
     {
-        var finalProtocol = _outerPacket.NextHeader;
-        var visitResult = Visit(NextProtocolCapturingVisitor.Instance, ref finalProtocol);
+        var visitResult = Visit(NextProtocolCapturingVisitor.Instance, IpProtocol.IPv6NoNextHeader);
 
-        payloadProtocol = finalProtocol;
-        payload = _availableBuffer.Slice(visitResult.LengthConsumed);
+        payloadProtocol = visitResult.VisitorState;
+        payload = _outerPacket.Payload.Slice(visitResult.LengthConsumed);
     }
 
-    public VisitResult<TVisitorState> Visit<TVisitor, TVisitorState>(TVisitor visitor, ref TVisitorState state)
+    /// <summary>
+    /// Visit each IPv6 extension in the packet.
+    /// </summary>
+    /// <typeparam name="TVisitor">The visitor implementation.</typeparam>
+    /// <typeparam name="TVisitorState">The visitor state.</typeparam>
+    /// <param name="visitor">An instance of a visitor that is invoked when different packets are provided.</param>
+    /// <param name="state">An state value that is passed byref, and can be used to pass state around through the calls to the visitor.</param>
+    /// <returns>A visit result, indicating how much data was consumed by the visitor.</returns>
+    public VisitResult<TVisitorState> Visit<TVisitor, TVisitorState>(TVisitor visitor, in TVisitorState state)
         where TVisitor : IIpv6ExtensionVisitor<TVisitorState>
     {
         var nextProtocol = _outerPacket.NextHeader;
-        var remainingData = _availableBuffer;
+        var remainingData = _outerPacket.Payload;
         var consumed = 0;
+        var currentState = state;
+        var stopVisiting = false;
 
-        while (true)
+        while (!stopVisiting)
         {
-            var (extNext, isExtension, extSize) = TryVisitNextBlock(nextProtocol, visitor, ref state, remainingData);
+            var (extNext, isExtension, extSize) = TryVisitNextBlock(nextProtocol, visitor, ref currentState, remainingData, ref stopVisiting);
 
             if (isExtension)
             {
@@ -80,7 +111,7 @@ public readonly ref struct Ipv6ExtensionVisitor
 
         // If there's no next header, it means there's no data payload,
         // so return false.
-        return new VisitResult<TVisitorState>(ref state, consumed, remainingData.Length);
+        return new VisitResult<TVisitorState>(currentState, consumed, remainingData.Length);
     }
 
     private sealed class NextProtocolCapturingVisitor : IIpv6ExtensionVisitor<IpProtocol>
@@ -91,19 +122,19 @@ public readonly ref struct Ipv6ExtensionVisitor
         {
         }
 
-        public void VisitIpv6FragmentExtension(ref IpProtocol state, IpProtocol protocol, ReadOnlyIpv6FragmentExtensionSpan span)
+        public IpProtocol VisitIpv6FragmentExtension(in IpProtocol state, IpProtocol protocol, ReadOnlyIpv6FragmentExtensionSpan span, ref bool stopVisiting)
         {
-            state = span.NextHeader;
+            return span.NextHeader;
         }
 
-        public void VisitIpv6HopByHopAndDestinationExtension(ref IpProtocol state, IpProtocol protocol, ReadOnlyIpv6HopByHopAndDestinationExtensionSpan span)
+        public IpProtocol VisitIpv6HopByHopAndDestinationExtension(in IpProtocol state, IpProtocol protocol, ReadOnlyIpv6HopByHopAndDestinationExtensionSpan span, ref bool stopVisiting)
         {
-            state = span.NextHeader;
+            return span.NextHeader;
         }
 
-        public void VisitIpv6RoutingExtension(ref IpProtocol state, IpProtocol protocol, ReadOnlyIpv6RoutingExtensionSpan span)
+        public IpProtocol VisitIpv6RoutingExtension(in IpProtocol state, IpProtocol protocol, ReadOnlyIpv6RoutingExtensionSpan span, ref bool stopVisiting)
         {
-            state = span.NextHeader;
+            return span.NextHeader;
         }
     }
 
@@ -111,7 +142,8 @@ public readonly ref struct Ipv6ExtensionVisitor
         IpProtocol nextProtocol,
         TVisitor visitor,
         ref TVisitorState visitorState,
-        ReadOnlySpan<byte> remainingBuffer)
+        ReadOnlySpan<byte> remainingBuffer,
+        ref bool stopVisiting)
         where TVisitor : IIpv6ExtensionVisitor<TVisitorState>
     {
         switch (nextProtocol)
@@ -122,7 +154,7 @@ public readonly ref struct Ipv6ExtensionVisitor
                 // Interrogate the extension data.
                 var ext = new ReadOnlyIpv6HopByHopAndDestinationExtensionSpan(remainingBuffer);
 
-                visitor.VisitIpv6HopByHopAndDestinationExtension(ref visitorState, nextProtocol, ext);
+                visitorState = visitor.VisitIpv6HopByHopAndDestinationExtension(visitorState, nextProtocol, ext, ref stopVisiting);
 
                 return (ext.NextHeader, true, ext.GetTotalSize());
             }
@@ -131,7 +163,7 @@ public readonly ref struct Ipv6ExtensionVisitor
             {
                 var ext = new ReadOnlyIpv6RoutingExtensionSpan(remainingBuffer);
 
-                visitor.VisitIpv6RoutingExtension(ref visitorState, nextProtocol, ext);
+                visitorState = visitor.VisitIpv6RoutingExtension(visitorState, nextProtocol, ext, ref stopVisiting);
 
                 return (ext.NextHeader, true, ext.GetTotalSize());
             }
@@ -140,7 +172,7 @@ public readonly ref struct Ipv6ExtensionVisitor
             {
                 var ext = new ReadOnlyIpv6FragmentExtensionSpan(remainingBuffer);
 
-                visitor.VisitIpv6FragmentExtension(ref visitorState, nextProtocol, ext);
+                visitorState = visitor.VisitIpv6FragmentExtension(visitorState, nextProtocol, ext, ref stopVisiting);
 
                 return (ext.NextHeader, true, ext.GetTotalSize());
             }

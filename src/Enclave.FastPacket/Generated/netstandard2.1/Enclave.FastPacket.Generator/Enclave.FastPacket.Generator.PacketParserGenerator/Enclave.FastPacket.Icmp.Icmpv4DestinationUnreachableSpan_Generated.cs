@@ -84,11 +84,17 @@ namespace Enclave.FastPacket.Icmp
            get => _span.Slice(0 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + sizeof(ushort) + sizeof(ushort));
         }
         
+        /// <summary>
+        /// Get a string representation of this packet.
+        /// </summary>
         public override string ToString()
         {
             return $"Type: {Type}; Code: {Code}; Checksum: {Checksum}; ; NextHopMtu: {NextHopMtu}; IpHeaderAndDatagram: {IpHeaderAndDatagram.Length} bytes";
         }
 
+        /// <summary>
+        /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
+        /// </summary>
         public int GetTotalSize()
         {
             return 0 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + sizeof(ushort) + sizeof(ushort) + _span.Slice(0 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + sizeof(ushort) + sizeof(ushort)).Length;

@@ -27,7 +27,6 @@ namespace Enclave.FastPacket.Icmp
         /// Gets the raw underlying buffer for this packet.
         /// </summary>
         public ReadOnlySpan<byte> GetRawData() => _span;
-
         
         
         /// <summary>
@@ -83,5 +82,20 @@ namespace Enclave.FastPacket.Icmp
            get => BinaryPrimitives.ReadUInt32BigEndian(_span.Slice(0 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + sizeof(ushort) + sizeof(ushort)));
         }
         
+        /// <summary>
+        /// Get a string representation of this packet.
+        /// </summary>
+        public override string ToString()
+        {
+            return $"Type: {Type}; Code: {Code}; Checksum: {Checksum}; Identifier: {Identifier}; SequenceNumber: {SequenceNumber}; AddressMask: {AddressMask}";
+        }
+
+        /// <summary>
+        /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
+        /// </summary>
+        public int GetTotalSize()
+        {
+            return 0 + sizeof(byte) + sizeof(byte) + sizeof(ushort) + sizeof(ushort) + sizeof(ushort) + sizeof(uint);
+        }
     }
 }
