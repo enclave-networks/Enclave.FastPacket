@@ -60,7 +60,7 @@ public readonly ref struct Ipv6ExtensionVisitor
     /// </summary>
     public int GetSize()
     {
-        var visitResult = Visit(NextProtocolCapturingVisitor.Instance, IpProtocol.IPv6NoNextHeader);
+        var visitResult = Visit(NextProtocolCapturingVisitor.Instance, _outerPacket.NextHeader);
 
         return visitResult.LengthConsumed;
     }
@@ -70,10 +70,18 @@ public readonly ref struct Ipv6ExtensionVisitor
     /// </summary>
     public void GetActualPayload(out IpProtocol payloadProtocol, out ReadOnlySpan<byte> payload)
     {
-        var visitResult = Visit(NextProtocolCapturingVisitor.Instance, IpProtocol.IPv6NoNextHeader);
+        var visitResult = Visit(NextProtocolCapturingVisitor.Instance, _outerPacket.NextHeader);
 
         payloadProtocol = visitResult.VisitorState;
-        payload = _outerPacket.Payload.Slice(visitResult.LengthConsumed);
+
+        if (visitResult.LengthConsumed > 0)
+        {
+            payload = _outerPacket.Payload.Slice(visitResult.LengthConsumed);
+        }
+        else
+        {
+            payload = _outerPacket.Payload;
+        }
     }
 
     /// <summary>

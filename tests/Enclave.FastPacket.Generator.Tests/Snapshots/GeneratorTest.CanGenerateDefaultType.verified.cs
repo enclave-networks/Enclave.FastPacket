@@ -36,11 +36,17 @@ namespace T
            set => BinaryPrimitives.WriteUInt16BigEndian(_span.Slice(0), value); 
         }
         
+        /// <summary>
+        /// Get a string representation of this packet.
+        /// </summary>
         public override string ToString()
         {
             return $"Value: {Value}";
         }
 
+        /// <summary>
+        /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
+        /// </summary>
         public int GetTotalSize()
         {
             return 0 + sizeof(ushort);
