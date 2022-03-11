@@ -283,6 +283,33 @@ public readonly ref partial struct MyPacket
 }
 ```
 
+### ToString
+
+We will auto-generate a simple `ToString` implementation for you by default, with details of all the public properties of the packet
+included.
+
+If you specify your own `ToString` override in your implementation struct, that replaces the default one we add.
+
+```csharp
+ref struct MyPacketDefinition
+{
+    public ushort Value1 { get; set; }
+
+    public ReadOnlySpan<byte> Payload { get; set; }
+}
+
+[PacketImplementation(typeof(MyPacketDefinition), IsReadOnly = true)]
+public readonly ref partial struct MyPacket
+{
+}
+
+var packetInstance = MyPacket(new byte[] { 0x00, 0x02, 0x00, 0x00, 0x00 });
+
+// Prints:
+// Value1: 2; Payload: 3 bytes
+Console.WriteLine(packetInstance.ToString());
+```
+
 ### Field Visibility
 
 The visibility of fields in the packet definition become the visibility of those fields in the implementation.
@@ -547,10 +574,10 @@ the bits that you've specified.
 
 # Near-term tasks
 
+- [ ] Improve our test coverage; try on more "real" packets, bring over test cases from our internal code-bases.
 - [ ] Add support for field size coming from a named preceding property.
-- [ ] Support string extraction (ReadOnlySpan<char>?). A UTF8 reader may be better.
+- [ ] Natively support string extraction (`ReadOnlySpan<char>`/`Utf8Reader`?)
 - [ ] Implement a layer 7 protocol inspector (HTTP?) to prove extraction all the way down the stack.
-- [ ] Add more test cases.
 
 # Contributors
 

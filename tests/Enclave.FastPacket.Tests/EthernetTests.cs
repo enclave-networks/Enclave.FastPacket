@@ -17,30 +17,4 @@ public class EthernetTests
 
         type.Should().Be(EthernetType.IPv4);
     }
-
-    private void Stuff()
-    {
-        Span<byte> packetSpan = new byte[] { /** some packet data **/ };
-        
-        var ethernetSpan = new EthernetPacketSpan(packetSpan);
-
-        if (ethernetSpan.Type == EthernetType.IPv4)
-        {
-            // Most of our spans have a 'Payload' property, which contains all the
-            // data the packet encapsulates.
-            var ipSpan = new Ipv4PacketSpan(ethernetSpan.Payload);
-
-            // Check the source address.
-            if (ipSpan.Source == ValueIpAddress.Loopback &&
-                ipSpan.Protocol == IpProtocol.Tcp)
-            {
-                // Use the IP payload.
-                var tcpSpan = new TcpPacketSpan(ipSpan.Payload);
-
-                // Change the destination port so everything goes to port 80. This directly writes to
-                // the underlying buffer, at the right position.
-                tcpSpan.DestinationPort = 80;
-            }
-        }
-    }
 }
