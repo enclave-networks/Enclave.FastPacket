@@ -68,7 +68,7 @@ namespace T
         {
             return $"Value1: {Value1}; Source: {Source}; Destination: {Destination}; Value2: {Value2}";
         }
-
+        
         /// <summary>
         /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
         /// </summary>

@@ -54,7 +54,7 @@ namespace T
         {
             return $"Value: {Value.Length} bytes; Value2: {Value2.Length} bytes; Remaining: {Remaining.Length} bytes";
         }
-
+        
         /// <summary>
         /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
         /// </summary>

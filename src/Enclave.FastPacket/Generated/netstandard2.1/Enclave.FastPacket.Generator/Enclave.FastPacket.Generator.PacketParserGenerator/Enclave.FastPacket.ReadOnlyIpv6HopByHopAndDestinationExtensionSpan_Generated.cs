@@ -62,7 +62,7 @@ namespace Enclave.FastPacket
         {
             return $"NextHeader: {NextHeader}; HeaderExtensionLength: {HeaderExtensionLength}; OptionsAndPadding: {OptionsAndPadding.Length} bytes";
         }
-
+        
         /// <summary>
         /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
         /// </summary>

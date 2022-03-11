@@ -12,12 +12,14 @@ public class PacketInspectionBenchmark
 {
     private byte[] _etherPacketUdpPortsContent;
     private byte[] _etherPacketTcpContent;
+    private byte[] _etherPacketIpv6Content;
 
     [GlobalSetup]
     public void Setup()
     {
-       _etherPacketUdpPortsContent = GetEthernetPacketWithUdpPorts();
-       _etherPacketTcpContent = GetRealEthernetAndTcpPacket();
+        _etherPacketUdpPortsContent = GetEthernetPacketWithUdpPorts();
+        _etherPacketTcpContent = GetRealEthernetAndTcpPacket();
+        _etherPacketIpv6Content = GetIpv6Packet();
     }
 
     [Benchmark]
@@ -49,7 +51,7 @@ public class PacketInspectionBenchmark
     }
 
     [Benchmark]
-    public void GetUdpPorts_PacketDotNet()
+    public void GetIpv4UdpPorts_PacketDotNet()
     {
         var byteArraySegment = new PacketDotNet.Utils.ByteArraySegment(_etherPacketUdpPortsContent);
 
@@ -77,7 +79,7 @@ public class PacketInspectionBenchmark
     }
 
     [Benchmark]
-    public void GetUdpPorts_FastPacket()
+    public void GetIpv4UdpPorts_FastPacket()
     {
         var ethernetPacket = new EthernetPacketSpan(_etherPacketUdpPortsContent);
 
@@ -101,7 +103,7 @@ public class PacketInspectionBenchmark
     }
 
     [Benchmark]
-    public void GetTcpPorts_PacketDotNet()
+    public void GetIpv4TcpPorts_PacketDotNet()
     {
         var byteArraySegment = new PacketDotNet.Utils.ByteArraySegment(_etherPacketTcpContent);
 
@@ -129,7 +131,7 @@ public class PacketInspectionBenchmark
     }
 
     [Benchmark]
-    public void GetTcpPorts_FastPacket()
+    public void GetIpv4TcpPorts_FastPacket()
     {
         var ethernetPacket = new EthernetPacketSpan(_etherPacketTcpContent);
 
@@ -154,7 +156,7 @@ public class PacketInspectionBenchmark
 
 
     [Benchmark]
-    public void GetTcpPayloadSize_PacketDotNet()
+    public void GetIpv4TcpPayloadSize_PacketDotNet()
     {
         var byteArraySegment = new PacketDotNet.Utils.ByteArraySegment(_etherPacketTcpContent);
 
@@ -181,7 +183,7 @@ public class PacketInspectionBenchmark
     }
 
     [Benchmark]
-    public void GetTcpPayloadSize_FastPacket()
+    public void GetIpv4TcpPayloadSize_FastPacket()
     {
         var ethernetPacket = new EthernetPacketSpan(_etherPacketTcpContent);
 
@@ -204,7 +206,7 @@ public class PacketInspectionBenchmark
     }
 
     [Benchmark]
-    public void CheckForTcpAck_PacketDotNet()
+    public void CheckForIpv4TcpAck_PacketDotNet()
     {
         var byteArraySegment = new PacketDotNet.Utils.ByteArraySegment(_etherPacketTcpContent);
 
@@ -229,7 +231,7 @@ public class PacketInspectionBenchmark
     }
 
     [Benchmark]
-    public void CheckForTcpAck_FastPacket()
+    public void CheckForIpv4TcpAck_FastPacket()
     {
         var ethernetPacket = new EthernetPacketSpan(_etherPacketTcpContent);
 
@@ -249,6 +251,62 @@ public class PacketInspectionBenchmark
         }
     }
 
+    [Benchmark]
+    public void GetIpv6UdpPorts_PacketDotNet()
+    {
+        var byteArraySegment = new PacketDotNet.Utils.ByteArraySegment(_etherPacketIpv6Content);
+
+        var ethernetPacket = new PacketDotNet.EthernetPacket(byteArraySegment);
+
+        if (ethernetPacket.Type == PacketDotNet.EthernetType.IPv6)
+        {
+            var ipPacket = ethernetPacket.Extract<IPPacket>();
+
+            var protocol = ipPacket.Protocol;
+
+            if (protocol == ProtocolType.Udp)
+            {
+                var udpPacket = ipPacket.Extract<PacketDotNet.UdpPacket>();
+
+                var srcPort = udpPacket.SourcePort;
+                var dstPort = udpPacket.DestinationPort;
+
+                if (srcPort != 1024 || dstPort != 63000)
+                {
+                    throw new InvalidOperationException("bad ports");
+                }
+            }
+        }
+    }
+
+    [Benchmark]
+    public void GetIpv6UdpPorts_FastPacket()
+    {
+        var ethernetPacket = new EthernetPacketSpan(_etherPacketIpv6Content);
+
+        if (ethernetPacket.Type == EthernetType.IPv6)
+        {
+            var ipPacket = new ReadOnlyIpv6PacketSpan(ethernetPacket.Payload);
+
+            // Make sure we allow for any extensions.
+            ipPacket.Extensions.GetActualPayload(out var protocol, out var payload);
+
+            if (protocol == IpProtocol.Udp)
+            {
+                var udpPacket = new ReadOnlyUdpPacketSpan(payload);
+
+                var srcPort = udpPacket.SourcePort;
+                var dstPort = udpPacket.DestinationPort;
+
+                if (srcPort != 1024 || dstPort != 63000)
+                {
+                    throw new InvalidOperationException("bad ports");
+                }
+            }
+        }
+    }
+
+
     private static byte[] GetEthernetPacketWithUdpPorts()
     {
         var ethernetPacket = new PacketDotNet.EthernetPacket(
@@ -257,6 +315,30 @@ public class PacketInspectionBenchmark
                     PacketDotNet.EthernetType.IPv4);
 
         var ipPacket = new IPv4Packet(IPAddress.Parse("127.0.0.1"), IPAddress.Parse("10.0.0.1"));
+
+        var udpPacket = new PacketDotNet.UdpPacket(1024, 63000);
+
+        var data = new byte[32_000];
+
+        Array.Fill<byte>(data, 0xFF);
+
+        udpPacket.PayloadData = data;
+
+        ipPacket.PayloadPacket = udpPacket;
+
+        ethernetPacket.PayloadPacket = ipPacket;
+
+        return ethernetPacket.Bytes;
+    }
+
+    private static byte[] GetIpv6Packet()
+    {
+        var ethernetPacket = new PacketDotNet.EthernetPacket(
+                    PhysicalAddress.Parse("FF:FF:FF:FF:FF:FF"),
+                    PhysicalAddress.Parse("00:FF:00:FF:FF:FF"),
+                    PacketDotNet.EthernetType.IPv6);
+
+        var ipPacket = new IPv6Packet(IPAddress.Parse("2001:db8:3333:4444:5555:6666:7777:8888"), IPAddress.Parse("2001:db8::123.123.123.123"));
 
         var udpPacket = new PacketDotNet.UdpPacket(1024, 63000);
 

@@ -81,7 +81,7 @@ namespace Enclave.FastPacket.Icmp
         {
             return $"Type: {Type}; Code: {Code}; Checksum: {Checksum}; ; IpHeaderAndDatagram: {IpHeaderAndDatagram.Length} bytes";
         }
-
+        
         /// <summary>
         /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
         /// </summary>

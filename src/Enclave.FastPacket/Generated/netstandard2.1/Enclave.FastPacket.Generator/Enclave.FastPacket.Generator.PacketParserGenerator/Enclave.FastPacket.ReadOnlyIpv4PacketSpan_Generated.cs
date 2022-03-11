@@ -176,7 +176,7 @@ namespace Enclave.FastPacket
         {
             return $"Version: {Version}; IHL: {IHL}; Dscp: {Dscp}; TotalLength: {TotalLength}; Identification: {Identification}; FragmentFlags: {FragmentFlags}; FragmentOffset: {FragmentOffset}; Ttl: {Ttl}; Protocol: {Protocol}; HeaderChecksum: {HeaderChecksum}; Source: {Source}; Destination: {Destination}; Options: {Options.Length} bytes; Payload: {Payload.Length} bytes";
         }
-
+        
         /// <summary>
         /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
         /// </summary>

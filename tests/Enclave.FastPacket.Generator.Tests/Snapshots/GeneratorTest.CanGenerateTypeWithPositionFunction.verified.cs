@@ -50,7 +50,7 @@ namespace T
         {
             return $"Value: {Value}; NextValue: {NextValue}";
         }
-
+        
         /// <summary>
         /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
         /// </summary>

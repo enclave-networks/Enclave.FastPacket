@@ -77,7 +77,7 @@ namespace Enclave.FastPacket
         {
             return $"NextHeader: {NextHeader}; ; FragmentOffset: {FragmentOffset}; MoreFragments: {MoreFragments}; Identification: {Identification}";
         }
-
+        
         /// <summary>
         /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
         /// </summary>

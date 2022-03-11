@@ -125,7 +125,7 @@ namespace Enclave.FastPacket
         {
             return $"HardwareType: {HardwareType}; ProtocolType: {ProtocolType}; HardwareAddressLength: {HardwareAddressLength}; ProtocolAddressLength: {ProtocolAddressLength}; Operation: {Operation}; SenderHardwareAddress: {SenderHardwareAddress}; SenderProtocolAddress: {SenderProtocolAddress}; TargetHardwareAddress: {TargetHardwareAddress}; TargetProtocolAddress: {TargetProtocolAddress}";
         }
-
+        
         /// <summary>
         /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
         /// </summary>

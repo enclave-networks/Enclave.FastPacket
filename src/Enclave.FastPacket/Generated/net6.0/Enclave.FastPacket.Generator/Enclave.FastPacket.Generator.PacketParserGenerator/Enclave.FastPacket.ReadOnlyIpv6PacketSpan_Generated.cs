@@ -116,7 +116,7 @@ namespace Enclave.FastPacket
         {
             return $"Version: {Version}; TrafficClass: {TrafficClass}; FlowLabel: {FlowLabel}; PayloadLength: {PayloadLength}; NextHeader: {NextHeader}; HopLimit: {HopLimit}; Source: {Source}; Destination: {Destination}; Payload: {Payload.Length} bytes";
         }
-
+        
         /// <summary>
         /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
         /// </summary>

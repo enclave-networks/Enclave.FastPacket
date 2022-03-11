@@ -34,7 +34,7 @@ namespace {{Namespace}}
         {
            get => {{ getPropGetExpr prop "_span" }};
         }
-        {{ end }}
+        {{ end }}{{ if AddToStringMethod }}
         /// <summary>
         /// Get a string representation of this packet.
         /// </summary>
@@ -42,7 +42,7 @@ namespace {{Namespace}}
         {
             return {{ getToStringFormat }};
         }
-
+        {{ end }}
         /// <summary>
         /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
         /// </summary>

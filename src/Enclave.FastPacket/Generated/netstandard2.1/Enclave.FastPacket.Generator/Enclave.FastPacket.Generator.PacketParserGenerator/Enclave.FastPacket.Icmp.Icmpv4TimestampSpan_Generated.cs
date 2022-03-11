@@ -115,7 +115,7 @@ namespace Enclave.FastPacket.Icmp
         {
             return $"Type: {Type}; Code: {Code}; Checksum: {Checksum}; Identifier: {Identifier}; SequenceNumber: {SequenceNumber}; OrginateTimeStamp: {OrginateTimeStamp}; ReceiveTimeStamp: {ReceiveTimeStamp}; TransmitTimeStamp: {TransmitTimeStamp}";
         }
-
+        
         /// <summary>
         /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
         /// </summary>

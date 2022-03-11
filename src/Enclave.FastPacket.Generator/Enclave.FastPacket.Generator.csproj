@@ -31,6 +31,10 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <InCI Condition="'$(CI)' == 'true'">true</InCI>
+    </PropertyGroup>
+
 	<ItemGroup>
 		<!-- Package the generator in the analyzer directory of the nuget package -->
 		<None Include="..\..\README.md" Pack="true" PackagePath="\" />

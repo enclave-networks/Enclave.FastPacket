@@ -19,6 +19,7 @@ public class PacketParserGenerator : ISourceGenerator
 
     public PacketParserGenerator()
     {
+#if !InCI
         // Figure out how to remove this when packing in 1.0.
         AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
         {
@@ -40,6 +41,7 @@ public class PacketParserGenerator : ISourceGenerator
 
             return null;
         };
+#endif
     }
 
     public void Execute(GeneratorExecutionContext context)

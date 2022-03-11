@@ -42,24 +42,26 @@ common packet information such as UDP/TCP ports and payload size (you can find t
 All these benchmarks start from reading a raw ethernet frame.
 
 ```markdown
-BenchmarkDotNet=v0.12.1, OS=Windows 10.0.22000
+BenchmarkDotNet=v0.13.1, OS=Windows 10.0.22000
 Intel Core i7-9750H CPU 2.60GHz, 1 CPU, 12 logical and 6 physical cores
-.NET Core SDK=6.0.101
-  [Host]     : .NET Core 6.0.1 (CoreCLR 6.0.121.56705, CoreFX 6.0.121.56705), X64 RyuJIT
-  DefaultJob : .NET Core 6.0.1 (CoreCLR 6.0.121.56705, CoreFX 6.0.121.56705), X64 RyuJIT  
+.NET SDK=6.0.200
+  [Host]     : .NET 6.0.2 (6.0.222.6406), X64 RyuJIT
+  DefaultJob : .NET 6.0.2 (6.0.222.6406), X64 RyuJIT
 
-|                                  Method |       Mean |     Error |    StdDev |  Gen 0 |  Gen 1 | Allocated |
-|---------------------------------------- |-----------:|----------:|----------:|-------:|-------:|----------:|
-| GetEthernetHardwareAddress_PacketDotNet |  45.019 ns | 0.6650 ns | 0.5553 ns | 0.0523 |      - |     328 B |
-|   GetEthernetHardwareAddress_FastPacket |   9.838 ns | 0.1141 ns | 0.0953 ns |      - |      - |         - |
-|                GetUdpPorts_PacketDotNet | 188.075 ns | 3.3844 ns | 3.0002 ns | 0.1376 | 0.0002 |     864 B |
-|                  GetUdpPorts_FastPacket |  12.991 ns | 0.1173 ns | 0.1040 ns |      - |      - |         - |
-|                GetTcpPorts_PacketDotNet | 190.251 ns | 3.7058 ns | 5.3147 ns | 0.1376 | 0.0002 |     864 B |
-|                  GetTcpPorts_FastPacket |  13.006 ns | 0.1548 ns | 0.1448 ns |      - |      - |         - |
-|          GetTcpPayloadSize_PacketDotNet | 221.873 ns | 4.4573 ns | 4.5773 ns | 0.1490 | 0.0002 |     936 B |
-|            GetTcpPayloadSize_FastPacket |  18.953 ns | 0.1827 ns | 0.1620 ns |      - |      - |         - |
-|             CheckForTcpAck_PacketDotNet | 196.111 ns | 3.9409 ns | 7.9608 ns | 0.1376 | 0.0002 |     864 B |
-|               CheckForTcpAck_FastPacket |  12.772 ns | 0.1702 ns | 0.1421 ns |      - |      - |         - |
+|                                  Method |      Mean |    Error |   StdDev |  Gen 0 |  Gen 1 | Allocated |
+|---------------------------------------- |----------:|---------:|---------:|-------:|-------:|----------:|
+| GetEthernetHardwareAddress_PacketDotNet |  46.92 ns | 0.968 ns | 0.906 ns | 0.0523 |      - |     328 B |
+|   GetEthernetHardwareAddress_FastPacket |  11.68 ns | 0.142 ns | 0.133 ns |      - |      - |         - |
+|            GetIpv4UdpPorts_PacketDotNet | 201.34 ns | 3.841 ns | 3.592 ns | 0.1376 | 0.0002 |     864 B |
+|              GetIpv4UdpPorts_FastPacket |  15.29 ns | 0.270 ns | 0.252 ns |      - |      - |         - |
+|            GetIpv4TcpPorts_PacketDotNet | 202.72 ns | 3.963 ns | 3.892 ns | 0.1376 | 0.0002 |     864 B |
+|              GetIpv4TcpPorts_FastPacket |  14.68 ns | 0.238 ns | 0.222 ns |      - |      - |         - |
+|      GetIpv4TcpPayloadSize_PacketDotNet | 233.52 ns | 4.693 ns | 5.586 ns | 0.1488 |      - |     936 B |
+|        GetIpv4TcpPayloadSize_FastPacket |  20.22 ns | 0.188 ns | 0.157 ns |      - |      - |         - |
+|         CheckForIpv4TcpAck_PacketDotNet | 202.70 ns | 4.010 ns | 3.751 ns | 0.1376 | 0.0002 |     864 B |
+|           CheckForIpv4TcpAck_FastPacket |  14.09 ns | 0.304 ns | 0.312 ns |      - |      - |         - |
+|            GetIpv6UdpPorts_PacketDotNet | 238.48 ns | 4.573 ns | 5.444 ns | 0.1516 |      - |     952 B |
+|              GetIpv6UdpPorts_FastPacket |  31.66 ns | 0.622 ns | 0.582 ns |      - |      - |         - |
 ```
 
 # How It Works
@@ -267,7 +269,7 @@ struct MyPacketDefinition
 If you need to adjust individual fields, you can apply the `PacketField` attribute:
 
 ```csharp
-struct MyPacketDefinition
+ref struct MyPacketDefinition
 {
     // Customise this block to be 10 bytes in size.
     [PacketField(Size = 10)]
@@ -292,7 +294,7 @@ If a blob field is the last property in the definition, we assume that it uses t
 If a blob field is in the middle of the packet, you will need to tell us what size it is (either explicitly or with a `SizeFunction`), otherwise we can't use it.
 
 ```csharp
-struct MyPacketDefinition
+ref struct MyPacketDefinition
 {
     public byte Field1 { get; set; }
 
@@ -312,7 +314,7 @@ It's fairly common to determine the size of a particular field based on some oth
 To that end, if you need to calculate the size of a field dynamically, you can do that by specifiying a static `SizeFunction` within the definition type.
 
 ```csharp
-struct MyPacketDefinition
+ref struct MyPacketDefinition
 {
     public ushort DataLength { get; set; }
 
@@ -505,18 +507,12 @@ union, using MSB-0 numbering to match a lot of RFC documentation.
 The FastPacket generator automatically generates the necessary bitmasks and shifts to convert the MSB-0 numbering and means that each value you read is only
 the bits that you've specified.
 
-# Remaining Pre-release tasks
+# Near-term tasks
 
-- [x] Refactor project layout to make management easier.
-- [x] Consider better ways to interact with 'knowing' what packet type is below the current position.
-- [x] Define standard 'patterns' for adding support for new protocols.
-- [x] Consider(?) a source generator for converting a simple declarative syntax into efficient packet structs.
 - [ ] Add support for field size coming from a named preceding property.
-- [x] Add support for field size coming from a local function in the definition.
-- [x] Add support for partial-byte fields.
 - [ ] Support string extraction (ReadOnlySpan<char>?). A UTF8 reader may be better.
 - [ ] Implement a layer 7 protocol inspector (HTTP?) to prove extraction all the way down the stack.
-- [ ] Add more thorough test cases.
+- [ ] Add more test cases.
 
 # Contributors
 

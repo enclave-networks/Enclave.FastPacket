@@ -23,7 +23,20 @@ internal class TemplatedParserBuilder : IParserBuilder
     {
         var sc = new ScriptObject();
 
-        var longestPropName = 0;
+        var addToStringMethod = true;
+
+        foreach (var toStringMember in structSymbol.GetMembers("ToString"))
+        {
+            if (toStringMember is IMethodSymbol toStringMethod &&
+                toStringMethod.DeclaredAccessibility == Accessibility.Public &&
+                toStringMethod.IsOverride &&
+                toStringMethod.Parameters.Length == 0)
+            {
+                // Type already has a defined ToString, don't override it.
+                addToStringMethod = false;
+                break;
+            }
+        }
 
         sc.Import(new
         {
@@ -31,7 +44,7 @@ internal class TemplatedParserBuilder : IParserBuilder
             TypeName = structSymbol.Name,
             Props = packetDef.PropertySet.ToList(),
             MinSizeExpression = packetDef.MinSizeExpression,
-            LongestPropName = longestPropName,
+            AddToStringMethod = addToStringMethod,
         },
         renamer: m => m.Name);
 

@@ -26,6 +26,31 @@ public class GeneratorTest
     }
 
     [Fact]
+    public Task CanGenerateTypeCustomToString()
+    {
+        return CompilationVerifier.Verify(@"
+            using Enclave.FastPacket.Generator;
+
+            namespace T
+            {
+                internal interface IPacketDefinition
+                {
+                    ushort Value { get; set; }
+                }
+
+                [PacketImplementation(typeof(IPacketDefinition))]
+                public readonly ref partial struct ValueItem
+                {
+                    public override string ToString()
+                    {
+                        return $""{Value}"";
+                    }
+                }
+            }");
+    }
+
+
+    [Fact]
     public Task CanGenerateTypeWithPositionFunction()
     {
         return CompilationVerifier.Verify(@"

@@ -134,7 +134,7 @@ namespace Enclave.FastPacket
         {
             return $"SourcePort: {SourcePort}; DestinationPort: {DestinationPort}; SequenceNumber: {SequenceNumber}; AckNumber: {AckNumber}; DataOffset: {DataOffset}; Flags: {Flags}; WindowSize: {WindowSize}; Checksum: {Checksum}; UrgentPointer: {UrgentPointer}; Options: {Options.Length} bytes; Payload: {Payload.Length} bytes";
         }
-
+        
         /// <summary>
         /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
         /// </summary>

@@ -64,7 +64,7 @@ namespace T
         {
             return $"Value: {Value}; Value1: {Value1}; UnionVal2: {UnionVal2}; Value2: {Value2}";
         }
-
+        
         /// <summary>
         /// Get the computed total size of this packet, including any dynamically-sized fields and trailing payloads.
         /// </summary>
