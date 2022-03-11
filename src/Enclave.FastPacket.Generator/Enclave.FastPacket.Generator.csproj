@@ -32,7 +32,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <InCI Condition="'$(CI)' == 'true'">true</InCI>
+        <RemoveLocalReferenceWorkaround Condition="'$(RemoveLocalReferenceWorkaround)' == 'true'">true</RemoveLocalReferenceWorkaround>
     </PropertyGroup>
 
 	<ItemGroup>

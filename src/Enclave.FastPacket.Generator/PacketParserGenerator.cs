@@ -19,7 +19,7 @@ public class PacketParserGenerator : ISourceGenerator
 
     public PacketParserGenerator()
     {
-#if !InCI
+#if !RemoveLocalReferenceWorkaround
         // Figure out how to remove this when packing in 1.0.
         AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
         {

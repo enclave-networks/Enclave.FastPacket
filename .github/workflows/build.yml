@@ -35,16 +35,31 @@ jobs:
       run: dotnet test
 
     - name: Build
+      working-directory: src/Enclave.FastPacket
       run: dotnet build -c Release /p:Version=${{ steps.gitversion.outputs.SemVer }}
+            
+    - name: Build Generator without Local Reference Workaround
+      working-directory: src/Enclave.FastPacket.Generator
+      run: dotnet build -c Release /p:Version=${{ steps.gitversion.outputs.SemVer }} /p:RemoveLocalReferenceWorkaround=true
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: generator-package
+        path: src/Enclave.FastPacket.Generator/bin/Release/Enclave.FastPacket.Generator.${{ steps.gitversion.outputs.SemVer }}.nupkg
+        
+    - uses: actions/upload-artifact@v3
+      with:
+        name: fastpacket-package
+        path: src/Enclave.FastPacket/bin/Release/Enclave.FastPacket.${{ steps.gitversion.outputs.SemVer }}.nupkg
 
     - name: Push Generator
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       working-directory: src/Enclave.FastPacket.Generator/bin/Release
       run: |
         dotnet nuget push *.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json
-                
+      
     - name: Push FastPacket
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       working-directory: src/Enclave.FastPacket/bin/Release
       run: |
         dotnet nuget push *.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json
