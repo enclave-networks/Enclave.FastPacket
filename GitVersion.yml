@@ -1,0 +1,11 @@
+assembly-versioning-scheme: None
+mode: ContinuousDelivery
+next-version: 1.0.0
+branches:
+  main:
+   mode: ContinuousDelivery
+  develop:
+   increment: Patch
+ignore:
+  sha: []
+merge-message-formats: {}
