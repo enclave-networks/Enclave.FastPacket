@@ -5,8 +5,6 @@ The FastPacket project provides efficient, zero-allocation mechanisms for readin
 [![Github Actions](https://github.com/enclave-networks/Enclave.FastPacket/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/enclave-networks/Enclave.FastPacket/actions)
 [![NuGet](https://img.shields.io/nuget/v/Enclave.FastPacket.svg)](https://nuget.org/packages/Enclave.FastPacket)
 
-> The library is currently pre-release as we work on tests and more protocol support.
-
 This project consists of two projects/packages:
 
 - Enclave.FastPacket, a high-performance library for reading and writing ethernet packets and a number of common protocols.
@@ -14,7 +12,7 @@ This project consists of two projects/packages:
 
 ## Motivations
 
-FastPacket aims to support real-time analysis of network traffic, and underpins the Enclave (https://enclave.io) packet analysis
+FastPacket aims to support real-time analysis/manipulation of network traffic, and underpins the Enclave (https://enclave.io) packet analysis
 behaviour needed for state-tracking of connections.
 
 We aim for the highest-possible performance, trying to remove the cost of reading any value that you aren't actually interested in.
@@ -33,6 +31,35 @@ rather than the `ByteArraySegment` approach used in PacketDotNet.
 
 This then spun out into wanting a standard way to define packet structures, so the source generator was born, and decided it was useful enough to others
 to open-source.
+
+## Example
+
+Here's an example of decoding an Ethernet packet containing IPv4 and TCP data, using FastPacket:
+
+```csharp
+Span<byte> packetSpan = new byte[] { /** some packet data **/ };
+        
+var ethernetSpan = new EthernetPacketSpan(packetSpan);
+
+if (ethernetSpan.Type == EthernetType.IPv4)
+{
+    // Most of our spans have a 'Payload' property, which contains all the
+    // data the packet encapsulates.
+    var ipSpan = new Ipv4PacketSpan(ethernetSpan.Payload);
+
+    // Check the source address and protocol.
+    if (ipSpan.Source == ValueIpAddress.Loopback &&
+        ipSpan.Protocol == IpProtocol.Tcp)
+    {
+        // Use the IP payload.
+        var tcpSpan = new TcpPacketSpan(ipSpan.Payload);
+
+        // Change the destination port so everything goes to port 80. This directly writes to
+        // the underlying buffer, at the right position.
+        tcpSpan.DestinationPort = 80;
+    }
+}
+```
 
 ## Benchmarks
 
@@ -64,6 +91,17 @@ Intel Core i7-9750H CPU 2.60GHz, 1 CPU, 12 logical and 6 physical cores
 |              GetIpv6UdpPorts_FastPacket |  31.66 ns | 0.622 ns | 0.582 ns |      - |      - |         - |
 ```
 
+## Supported Protocols
+
+- Ethernet
+- IPv4
+- IPv6
+- TCP
+- UDP
+- Icmpv4
+
+We'll be adding more protocols as we need them, and extending support for things like TCP Option reading, checksum validation, and so on.
+
 # How It Works
 
 FastPacket is backed by a a C# Source Generator (`Enclave.FastPacket.Generator`) that generates efficient packet decoders
@@ -73,7 +111,7 @@ The source generator approach lets us standardise on efficient patterns for read
 code everywhere.  It also lets *you* create decoders based on the same principles, without writing out bitmasks, offset calculations and big-endian
 reads by hand.
 
-Finally, the use of a source generator means we can effectively remove any virtual method calls, which helps with our performance a bit more again.
+Finally, the use of a source generator means we can remove any virtual method calls, which helps with our performance a bit more again.
 
 With FastPacket, we define packet *definitions*, and let the generator create the actual decoder.
 

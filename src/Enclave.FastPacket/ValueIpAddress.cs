@@ -2,6 +2,7 @@
 using System.Buffers.Binary;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.ConstrainedExecution;
 
 namespace Enclave.FastPacket;
 
@@ -23,6 +24,26 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
     /// Length in bytes of an IPv6 Address.
     /// </summary>
     public const int Ipv6Length = 16;
+
+    /// <summary>
+    /// An empty IP address.
+    /// </summary>
+    public static ValueIpAddress None { get; }
+
+    /// <summary>
+    /// Value representation of <see cref="IPAddress.Loopback"/>.
+    /// </summary>
+    public static ValueIpAddress Loopback { get; } = Create(IPAddress.Loopback);
+
+    /// <summary>
+    /// Value representation of <see cref="IPAddress.IPv6Loopback"/>.
+    /// </summary>
+    public static ValueIpAddress IPv6Loopback { get; } = Create(IPAddress.IPv6Loopback);
+
+    /// <summary>
+    /// Value representation of <see cref="IPAddress.Broadcast"/>.
+    /// </summary>
+    public static ValueIpAddress Broadcast { get; } = Create(IPAddress.Broadcast);
 
     /// <summary>
     /// Create an IPv4 address from a buffer.
