@@ -19,8 +19,11 @@ public class PacketParserGenerator : ISourceGenerator
 
     public PacketParserGenerator()
     {
+        // When we actually ship this as a nuget package, we definitely don't want to
+        // include this workaround required for building everything in one solution,
+        // in the released nuget. So we #if it out, based on a build property set
+        // in GH Actions.
 #if !REMOVE_LOCAL_REF_WORKAROUND
-        // Figure out how to remove this when packing in 1.0.
         AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
         {
             if (e.Name.StartsWith("Scriban", StringComparison.InvariantCulture))
