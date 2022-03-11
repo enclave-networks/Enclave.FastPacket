@@ -40,7 +40,7 @@ jobs:
             
     - name: Build Generator without Local Reference Workaround
       working-directory: src/Enclave.FastPacket.Generator
-      run: dotnet clean && dotnet build -c Release /p:Version=${{ steps.gitversion.outputs.SemVer }} /p:RemoveLocalReferenceWorkaround=true
+      run: dotnet build -c Release /p:Version=${{ steps.gitversion.outputs.SemVer }} /p:RemoveLocalReferenceWorkaround=true
 
     - uses: actions/upload-artifact@v3
       with:
