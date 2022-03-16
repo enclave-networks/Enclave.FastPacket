@@ -104,7 +104,7 @@ We'll be adding more protocols as we need them, and extending support for things
 
 # How It Works
 
-FastPacket is backed by a a C# Source Generator (`Enclave.FastPacket.Generator`) that generates efficient packet decoders
+FastPacket is backed by a C# Source Generator (`Enclave.FastPacket.Generator`) that generates efficient packet decoders
 from a simple type definition, that read directly from the underlying buffer.
 
 The source generator approach lets us standardise on efficient patterns for reading packets, without needing a large amount of repetitive
@@ -456,7 +456,7 @@ so we don't want to just represent them as blobs of data.
 You can use *any* custom type as a FastPacket field, as long as it implements the following:
 
 - A public constructor that takes a single `ReadOnlySpan<byte>` parameter.
-- A public `CopyTo` method that acccepts a s single `Span<byte>` parameter.
+- A public `CopyTo` method that acccepts a single `Span<byte>` parameter.
 - A public int constant called `Size` that defines how big the custom type is.
   *or*
   A public static method called `GetSize` that accepts a `ReadOnlySpan<byte>` that starts at the beginning of the field, and returns the size of the structure.
