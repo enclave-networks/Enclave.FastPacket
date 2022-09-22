@@ -1,0 +1,17 @@
+﻿{
+  Diagnostics: [
+    {
+      Id: FASTPACKET015,
+      Title: Specified size field has the wrong type,
+      Severity: Error,
+      WarningLevel: 0,
+      Location: : (10,9)-(10,50),
+      Description: ,
+      HelpLink: ,
+      MessageFormat: The specified size field {0} must return a numeric type. Size fields must be numeric fields in the same packet definition.,
+      Message: The specified size field DataSize must return a numeric type. Size fields must be numeric fields in the same packet definition.,
+      Category: FastPacket,
+      CustomTags: []
+    }
+  ]
+}

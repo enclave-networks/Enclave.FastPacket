@@ -356,7 +356,7 @@ based on the size of fields preceding it.
 
 If a blob field is the last property in the definition, we assume that it uses the remaining content of the packet's buffer, as with a lot of network payloads.
 
-If a blob field is in the middle of the packet, you will need to tell us what size it is (either explicitly or with a `SizeFunction`), otherwise we can't use it.
+If a blob field is in the middle of the packet, you will need to tell us what size it is (either explicitly or with a `SizeField` or `SizeFunction`), otherwise we can't use it.
 
 ```csharp
 ref struct MyPacketDefinition
@@ -371,6 +371,26 @@ ref struct MyPacketDefinition
     public ReadOnlySpan<byte> Payload { get; set; }
 }
 ```
+
+To that end, if you need to calculate the size of a field dynamically, you can do that by specifiying a `SizeField` within the packet,
+or adding a static `SizeFunction` within the definition type.
+
+### Field-Based Size Determination
+
+If the size of a field within your packet is determined by the size of another field (for example, a preceding 'Length' field ahead of a data segment),
+you can indicate that relationship using the `SizeField` property of the `PacketField` attribute:
+
+```csharp
+ref struct MyPacketDefinition
+{
+    public ushort DataLength { get; set; }
+
+    [PacketField(SizeField = nameof(DataLength))]
+    public ReadOnlySpan<byte> Data1 { get; set; }
+}
+```
+
+If the value of a single field alone isn't enough, you may need a `SizeFunction`.
 
 ### Function-Based Size Determination
 
@@ -412,6 +432,8 @@ or
 ```csharp
 public static int FuncName(ReadOnlySpan<byte> packet, int position)`
 ```
+
+In both versions, the `packet` parameter contains the *entire* packet buffer for inspection.
 
 If you use the second version, the position parameter tells you the known location of the field in question in case the length is stored somewhere in that field.
 
@@ -575,7 +597,6 @@ the bits that you've specified.
 # Near-term tasks
 
 - [ ] Improve our test coverage; try on more "real" packets, bring over test cases from our internal code-bases.
-- [ ] Add support for field size coming from a named preceding property.
 - [ ] Natively support string extraction (`ReadOnlySpan<char>`/`Utf8Reader`?)
 - [ ] Implement a layer 7 protocol inspector (HTTP?) to prove extraction all the way down the stack.
 

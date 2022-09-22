@@ -6,11 +6,12 @@ using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator;
 
-internal class PacketProperty : IPacketProperty
+internal class PacketField : IPacketField
 {
-    public PacketProperty(
+    public PacketField(
         string name,
         Accessibility accessibility,
+        Location diagnosticsLocation,
         PacketFieldOptions options,
         IPositionProvider positionProvider,
         ISizeProvider sizeProvider,
@@ -19,6 +20,8 @@ internal class PacketProperty : IPacketProperty
     {
         Name = name;
         Accessibility = accessibility;
+        DiagnosticsLocation = diagnosticsLocation;
+        Options = options;
         PositionProvider = positionProvider;
         SizeProvider = sizeProvider;
         ValueProvider = valueProvider;
@@ -29,11 +32,15 @@ internal class PacketProperty : IPacketProperty
 
     public Accessibility Accessibility { get; }
 
-    public IPositionProvider PositionProvider { get; }
+    public Location DiagnosticsLocation { get; }
 
-    public ISizeProvider SizeProvider { get; }
+    public PacketFieldOptions Options { get; }
 
-    public IValueProvider ValueProvider { get; }
+    public IPositionProvider PositionProvider { get; set; }
+
+    public ISizeProvider SizeProvider { get; set; }
+
+    public IValueProvider ValueProvider { get; set; }
 
     public IEnumerable<string> DocComments { get; }
 }

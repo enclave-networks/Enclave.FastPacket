@@ -8,7 +8,10 @@ public static class Diagnostics
         "Position functions must be public static methods in the definition type, with the following signature: `public static int {0}(ReadOnlySpan<byte> packetData, int defaultPosition)`.";
 
     private const string CommonSizeFunctionMessage =
-        "Position functions must be public static methods in the definition type, with the following signature: `public static int {0}(ReadOnlySpan<byte> packetData, int position)`.";
+        "Size functions must be public static methods in the definition type, with one of the following signatures: `public static int {0}(ReadOnlySpan<byte> packetData, int position)`, `public static int {0}(ReadOnlySpan<byte> packetData)`.";
+
+    private const string CommonSizeFieldMessage =
+        "Size fields must be numeric fields in the same packet definition.";
 
     public static readonly DiagnosticDescriptor TypeIsNotPartial = new DiagnosticDescriptor(id: "FASTPACKET001",
                                                                                              title: "Decorated type must be partial",
@@ -56,7 +59,7 @@ public static class Diagnostics
                                                                                              title: "Custom field type does not provide its own size, so you must provide the size",
                                                                                              messageFormat: "The specified custom field type {0} does not provide a `public const int Size`, or a " +
                                                                                                             "`public static int GetSize(ReadOnlySpan<byte> fieldBuffer)` method, so you must specify the " +
-                                                                                                            "`Size` property on `PacketFieldAttribute`",
+                                                                                                            "`Size`, `SizeField` or `SizeFunction` property on `PacketFieldAttribute`",
                                                                                              category: "FastPacket",
                                                                                              DiagnosticSeverity.Error,
                                                                                              isEnabledByDefault: true);
@@ -64,7 +67,7 @@ public static class Diagnostics
     public static readonly DiagnosticDescriptor SpanInMiddleOfPacketMustHaveSize = new DiagnosticDescriptor(id: "FASTPACKET008",
                                                                                              title: "If specifying a span of bytes in the middle of a packet, you must provide a size",
                                                                                              messageFormat: "The specified field {0} declares a variable sized block of data in the middle of a packet, so you must specify the " +
-                                                                                                            "`Size` or `SizeFunction` property on `PacketFieldAttribute`",
+                                                                                                            "`Size`, `SizeField` or `SizeFunction` property on `PacketFieldAttribute`",
                                                                                              category: "FastPacket",
                                                                                              DiagnosticSeverity.Error,
                                                                                              isEnabledByDefault: true);
@@ -99,9 +102,37 @@ public static class Diagnostics
 
     public static readonly DiagnosticDescriptor UnionsShouldHaveDeclaredSize = new DiagnosticDescriptor(id: "FASTPACKET013",
                                                                                              title: "Union structures in packets should declare a size using the PacketField attribute",
-                                                                                             messageFormat: "The union structure {0} must declare a size with either the 'Size' or 'SizeFunction' properties of a PacketFieldAttribute on the attached to the structure",
+                                                                                             messageFormat: "The union structure {0} must declare a size with either the 'Size', 'SizeField' or 'SizeFunction' properties of a PacketFieldAttribute attached to the structure",
                                                                                              category: "FastPacket",
                                                                                              DiagnosticSeverity.Error,
+                                                                                             isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor SizeFieldNotFound = new DiagnosticDescriptor(id: "FASTPACKET014",
+                                                                                             title: "Specified size field was not found",
+                                                                                             messageFormat: "The specified size field {0} was not found in this type. " + CommonSizeFieldMessage,
+                                                                                             category: "FastPacket",
+                                                                                             DiagnosticSeverity.Error,
+                                                                                             isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor SizeFieldNotValidType = new DiagnosticDescriptor(id: "FASTPACKET015",
+                                                                                             title: "Specified size field has the wrong type",
+                                                                                             messageFormat: "The specified size field {0} must return a numeric type. " + CommonSizeFieldMessage,
+                                                                                             category: "FastPacket",
+                                                                                             DiagnosticSeverity.Error,
+                                                                                             isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor SizeFieldAppearsAfter = new DiagnosticDescriptor(id: "FASTPACKET016",
+                                                                                             title: "Specified size field exists after this field",
+                                                                                             messageFormat: "The specified size field {0} is read from the byte stream after the field in which it is referenced, and has a dynamic position; this is not allowed",
+                                                                                             category: "FastPacket",
+                                                                                             DiagnosticSeverity.Error,
+                                                                                             isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor DuplicateSizeOptionsProvided = new DiagnosticDescriptor(id: "FASTPACKET017",
+                                                                                             title: "Redundant size options provided",
+                                                                                             messageFormat: $"Multiple size-related options have been provided; only one will be actually used of {nameof(PacketFieldOptions.Size)}, {nameof(PacketFieldOptions.SizeFunction)} and {nameof(PacketFieldOptions.SizeField)}",
+                                                                                             category: "FastPacket",
+                                                                                             DiagnosticSeverity.Warning,
                                                                                              isEnabledByDefault: true);
 
     public static readonly DiagnosticDescriptor InternalError = new DiagnosticDescriptor(id: "FASTPACKET255",

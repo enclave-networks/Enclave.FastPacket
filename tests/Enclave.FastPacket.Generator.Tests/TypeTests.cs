@@ -13,7 +13,7 @@ public class TypeTests
     [Fact]
     public Task CanGenerateBoolBitFields()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
 
 using Enclave.FastPacket.Generator;
 
@@ -41,6 +41,6 @@ namespace T
     {   
     }
 }
-            ");
+            ").Verify();
     }
 }

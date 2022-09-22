@@ -19,7 +19,7 @@ internal class TemplatedParserBuilder : IParserBuilder
         _template = Template.Parse(PacketParserGenerator.GetTemplateContent(templateName));
     }
 
-    public string Generate(PacketParserDefinition packetDef, GenerationOptions definitionTypeOptions, INamedTypeSymbol structSymbol, PacketPropertyFactory parserGenerator)
+    public string Generate(PacketParserDefinition packetDef, GenerationOptions definitionTypeOptions, INamedTypeSymbol structSymbol, PacketFieldFactory parserGenerator)
     {
         var sc = new ScriptObject();
 
@@ -62,13 +62,13 @@ internal class TemplatedParserBuilder : IParserBuilder
             return $"{positionExpression} + {sizeExpression}";
         };
 
-        Func<IPacketProperty, string, string> getPropGetExpression = (IPacketProperty prop, string spanName)
+        Func<IPacketField, string, string> getPropGetExpression = (IPacketField prop, string spanName)
             => prop.ValueProvider.GetPropGetExpression(spanName, prop.PositionProvider.GetPositionExpression(spanName));
 
-        Func<IPacketProperty, string, string, string> getPropSetExpression = (IPacketProperty prop, string spanName, string valueExpr)
+        Func<IPacketField, string, string, string> getPropSetExpression = (IPacketField prop, string spanName, string valueExpr)
             => prop.ValueProvider.GetPropSetExpression(spanName, prop.PositionProvider.GetPositionExpression(spanName), valueExpr);
 
-        Func<IPacketProperty, string> getTypeReferenceName = (IPacketProperty prop) =>
+        Func<IPacketField, string> getTypeReferenceName = (IPacketField prop) =>
         {
             if (prop.ValueProvider.TypeSymbol.Equals(parserGenerator.SpanByteType, SymbolEqualityComparer.Default) &&
                 definitionTypeOptions.IsReadOnly)
@@ -79,16 +79,16 @@ internal class TemplatedParserBuilder : IParserBuilder
             return prop.ValueProvider.TypeReferenceName;
         };
 
-        Func<IPacketProperty, string> getPropName = (IPacketProperty prop)
+        Func<IPacketField, string> getPropName = (IPacketField prop)
             => prop.Name;
 
-        Func<IPacketProperty, string> getPropAccessibility = (IPacketProperty prop)
+        Func<IPacketField, string> getPropAccessibility = (IPacketField prop)
             => SyntaxFacts.GetText(prop.Accessibility);
 
-        Func<IPacketProperty, IEnumerable<string>> getPropComments = (IPacketProperty prop)
+        Func<IPacketField, IEnumerable<string>> getPropComments = (IPacketField prop)
             => prop.DocComments;
 
-        Func<IPacketProperty, bool> canSet = (IPacketProperty prop)
+        Func<IPacketField, bool> canSet = (IPacketField prop)
             => prop.ValueProvider.CanSet;
 
         Func<string> getToStringFormat = () =>

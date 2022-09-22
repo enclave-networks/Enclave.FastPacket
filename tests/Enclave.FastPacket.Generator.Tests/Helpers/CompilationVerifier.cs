@@ -6,11 +6,43 @@ using System.Reflection;
 
 namespace Enclave.FastPacket.Generator.Tests.Helpers;
 
-internal static class CompilationVerifier
+public class FluentVerify
 {
-    public static Task Verify(string source)
+    private readonly string _source;
+    private IReadOnlyList<Action<Diagnostic>> _diagnostics = Array.Empty<Action<Diagnostic>>();
+
+    public static FluentVerify ForSource(string source)
     {
-        var compilation = Create(source);
+        return new FluentVerify(source);
+    }
+
+    private FluentVerify(string source)
+    {
+        _source = source;
+    }
+
+    public FluentVerify WithDiagnostics(params Action<Diagnostic>[] diagnosticAsserts)
+    {
+        _diagnostics = diagnosticAsserts;
+
+        return this;
+    }
+
+    public FluentVerify WithDiagnostics(params DiagnosticDescriptor[] diagnosticDescriptors)
+    {
+        static Action<Diagnostic> AssertDiag(DiagnosticDescriptor expected)
+        {
+            return (Diagnostic actual) => Assert.Equal(expected.Id, actual.Id);
+        }
+
+        _diagnostics = diagnosticDescriptors.Select(AssertDiag).ToArray();
+
+        return this;
+    }
+
+    public Task Verify()
+    {
+        var compilation = Create(_source);
 
         var generator = new PacketParserGenerator();
 
@@ -18,6 +50,8 @@ internal static class CompilationVerifier
 
         // Once through for the generated code diagnostics, where we update the compilation.
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var newCompilation, out var newDiagnostics);
+
+        Assert.Collection(newDiagnostics, _diagnostics.ToArray());
 
         return Verifier.Verify(driver)
                        .UseDirectory(Path.Combine(AttributeReader.GetProjectDirectory(), "Snapshots"));

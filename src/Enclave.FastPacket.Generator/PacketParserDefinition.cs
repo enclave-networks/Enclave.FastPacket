@@ -4,13 +4,13 @@ namespace Enclave.FastPacket.Generator;
 
 internal class PacketParserDefinition
 {
-    public PacketParserDefinition(IList<IPacketProperty> propertySet, string minSizeExpression)
+    public PacketParserDefinition(IList<IPacketField> propertySet, string minSizeExpression)
     {
         PropertySet = propertySet;
         MinSizeExpression = minSizeExpression;
     }
 
-    public IList<IPacketProperty> PropertySet { get; }
+    public IList<IPacketField> PropertySet { get; }
 
     public string MinSizeExpression { get; }
 }

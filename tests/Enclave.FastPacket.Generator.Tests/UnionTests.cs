@@ -19,7 +19,7 @@ public class UnionTests
     [Fact]
     public Task CanGenerateUnion()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
 
 using Enclave.FastPacket.Generator;
 
@@ -45,13 +45,13 @@ namespace T
     {   
     }
 }
-            ");
+            ").Verify();
     }
 
     [Fact]
     public Task CanGenerateUnionWithBitmask()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
 
 using Enclave.FastPacket.Generator;
 
@@ -79,13 +79,13 @@ namespace T
     {   
     }
 }
-            ");
+            ").Verify();
     }
 
     [Fact]
     public Task CanGenerateUnionWithLargeBitmask()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
 
 using Enclave.FastPacket.Generator;
 
@@ -120,6 +120,6 @@ namespace T
     {   
     }
 }
-            ");
+            ").Verify();
     }
 }

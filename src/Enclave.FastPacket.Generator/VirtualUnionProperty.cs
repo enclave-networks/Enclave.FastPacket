@@ -7,9 +7,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator;
 
-internal class VirtualUnionProperty : IPacketProperty
+internal class VirtualUnionField : IPacketField
 {
-    public VirtualUnionProperty(
+    public VirtualUnionField(
         string name,
         IPositionProvider positionProvider,
         ISizeProvider sizeProvider,
@@ -23,13 +23,23 @@ internal class VirtualUnionProperty : IPacketProperty
 
     public string Name { get; }
 
-    public IPositionProvider PositionProvider { get; }
+    public IPositionProvider PositionProvider { get; set; }
 
-    public ISizeProvider SizeProvider { get; }
+    public ISizeProvider SizeProvider { get; set; }
 
-    public IValueProvider ValueProvider => throw new InvalidOperationException("Cannot directly access the value of a union");
+    public IValueProvider ValueProvider
+    {
+        get => throw new InvalidOperationException("Unions cannot have their own value providers");
+        set => throw new InvalidOperationException("Unions cannot have their own value providers");
+    }
 
     public IEnumerable<string> DocComments { get; }
 
     public Accessibility Accessibility => throw new InvalidOperationException("Cannot directly access the accessibility of a union");
+
+    public IPropertySymbol DeclaredProperty => throw new NotImplementedException();
+
+    public Location DiagnosticsLocation => throw new NotImplementedException();
+
+    public PacketFieldOptions Options => throw new NotImplementedException();
 }
