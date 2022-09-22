@@ -23,15 +23,11 @@ internal class VirtualUnionField : IPacketField
 
     public string Name { get; }
 
-    public IPositionProvider PositionProvider { get; set; }
+    public IPositionProvider PositionProvider { get; }
 
-    public ISizeProvider SizeProvider { get; set; }
+    public ISizeProvider SizeProvider { get; }
 
-    public IValueProvider ValueProvider
-    {
-        get => throw new InvalidOperationException("Unions cannot have their own value providers");
-        set => throw new InvalidOperationException("Unions cannot have their own value providers");
-    }
+    public IValueProvider ValueProvider => throw new InvalidOperationException("Unions cannot have their own value providers");
 
     public IEnumerable<string> DocComments { get; }
 

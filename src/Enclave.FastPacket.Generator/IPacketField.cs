@@ -16,11 +16,11 @@ internal interface IPacketField
 
     public Accessibility Accessibility { get; }
 
-    public IPositionProvider PositionProvider { get; set; }
+    public IPositionProvider PositionProvider { get; }
 
-    public ISizeProvider SizeProvider { get; set; }
+    public ISizeProvider SizeProvider { get; }
 
-    public IValueProvider ValueProvider { get; set; }
+    public IValueProvider ValueProvider { get; }
 
     IEnumerable<string> DocComments { get; }
 }

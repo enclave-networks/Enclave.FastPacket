@@ -36,11 +36,11 @@ internal class PacketField : IPacketField
 
     public PacketFieldOptions Options { get; }
 
-    public IPositionProvider PositionProvider { get; set; }
+    public IPositionProvider PositionProvider { get; }
 
-    public ISizeProvider SizeProvider { get; set; }
+    public ISizeProvider SizeProvider { get; }
 
-    public IValueProvider ValueProvider { get; set; }
+    public IValueProvider ValueProvider { get; }
 
     public IEnumerable<string> DocComments { get; }
 }
