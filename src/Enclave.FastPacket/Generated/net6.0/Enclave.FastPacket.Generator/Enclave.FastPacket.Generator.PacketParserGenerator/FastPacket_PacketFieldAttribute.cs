@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Net.Sockets;
-using System.Reflection.Metadata;
 
 #nullable enable
 
@@ -27,7 +26,7 @@ namespace Enclave.FastPacket.Generator
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Typically you would set this on a <see cref="ReadOnlySpan{byte}"/> or <see cref="Span{byte}"/> field,
+        /// Typically you would set this on a <see cref="ReadOnlySpan{T}"/> or <see cref="Span{T}"/> field,
         /// to indicate the exact length of the buffer slice returned.
         /// </para>
         /// <para>

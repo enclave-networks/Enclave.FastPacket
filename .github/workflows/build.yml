@@ -37,7 +37,11 @@ jobs:
     - name: Build
       working-directory: src/Enclave.FastPacket
       run: dotnet build -c Release /p:Version=${{ steps.gitversion.outputs.SemVer }}
-            
+
+    - name: Clean Generator before proper build
+      working-directory: src/Enclave.FastPacket.Generator
+      run: dotnet clean
+
     - name: Build Generator without Local Reference Workaround
       working-directory: src/Enclave.FastPacket.Generator
       run: dotnet build -c Release /p:Version=${{ steps.gitversion.outputs.SemVer }} /p:RemoveLocalReferenceWorkaround=true
