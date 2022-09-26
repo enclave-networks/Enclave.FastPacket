@@ -14,7 +14,7 @@ public class SizeFunctionTests
     [Fact]
     public Task CanHaveOptionalPosition()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
 using System;
 using Enclave.FastPacket.Generator;
 
@@ -46,6 +46,6 @@ namespace T
     {   
     }
 }
-            ");
+            ").Verify();
     }
 }

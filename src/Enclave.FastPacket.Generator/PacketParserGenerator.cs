@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Enclave.FastPacket.Generator.PositionProviders;
 using Enclave.FastPacket.Generator.SizeProviders;
+using Enclave.FastPacket.Generator.ValueProviders;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -55,7 +56,7 @@ public class PacketParserGenerator : ISourceGenerator
         var trackSeenTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 #pragma warning restore RS1024 // Compare symbols correctly
 
-        var packetFieldFactory = new PacketPropertyFactory(context);
+        var packetFieldFactory = new PacketFieldFactory(context);
 
         var cachedPacketDefinitions = new Dictionary<INamedTypeSymbol, PacketParserDefinition>(SymbolEqualityComparer.Default);
 
@@ -95,7 +96,7 @@ public class PacketParserGenerator : ISourceGenerator
                 {
                     if (!cachedPacketDefinitions.TryGetValue(defType, out var parserDefinition))
                     {
-                        parserDefinition = CreatePacketDefinition(packetFieldFactory, defType);
+                        parserDefinition = CreatePacketDefinition(context, packetFieldFactory, defType);
 
                         cachedPacketDefinitions.Add(defType, parserDefinition);
                     }
@@ -123,7 +124,7 @@ public class PacketParserGenerator : ISourceGenerator
         }
     }
 
-    private static PacketParserDefinition CreatePacketDefinition(PacketPropertyFactory packetFieldFactory, INamedTypeSymbol defType)
+    private static PacketParserDefinition CreatePacketDefinition(GeneratorExecutionContext context, PacketFieldFactory packetFieldFactory, INamedTypeSymbol defType)
     {
         var propertySymbolSet = new List<(IPropertySymbol Prop, INamedTypeSymbol? UnionType)>();
 
@@ -152,15 +153,15 @@ public class PacketParserGenerator : ISourceGenerator
             }
         }
 
-        var propertySet = new List<IPacketProperty>();
+        var fieldSet = new List<IPacketField>();
 
-        IPacketProperty? lastProp = null;
+        IPacketField? lastProp = null;
         INamedTypeSymbol? currentUnion = null;
-        IPacketProperty? currentUnionProperty = null;
+        IPacketField? currentUnionProperty = null;
 
         var listMinSize = new List<string>();
 
-        void UpdateMinimumSizeEntries(IPacketProperty? createdProp)
+        void UpdateMinimumSizeEntries(IPacketField? createdProp)
         {
             if (createdProp!.PositionProvider is IConstantPositionProvider constantPosition)
             {
@@ -218,7 +219,7 @@ public class PacketParserGenerator : ISourceGenerator
             if (packetFieldFactory.TryCreate(defType, propSymbol, lastProp, idx == propertySymbolSet.Count - 1, out var createdProp))
             {
                 // Add this to render.
-                propertySet.Add(createdProp!);
+                fieldSet.Add(createdProp!);
 
                 // If we're in a union, we don't move the last property on, so the start position stays the same
                 // for the next property.
@@ -238,7 +239,48 @@ public class PacketParserGenerator : ISourceGenerator
             minSizeExpression = string.Join(" + ", listMinSize);
         }
 
-        return new PacketParserDefinition(propertySet, minSizeExpression);
+        ValidateLateBoundFieldSet(context, fieldSet);
+
+        return new PacketParserDefinition(fieldSet, minSizeExpression);
+    }
+
+    private static void ValidateLateBoundFieldSet(GeneratorExecutionContext context, List<IPacketField> fieldSet)
+    {
+        static void BindLateBoundField(GeneratorExecutionContext context, List<IPacketField> fieldSet, ILateBoundFieldReferencingProvider provider, IPacketField field, int currentFieldIndex)
+        {
+            var refFieldIndex = fieldSet.FindIndex(x => x.Name.Equals(provider.PropertyName, StringComparison.Ordinal));
+
+            if (refFieldIndex == -1)
+            {
+                provider.FieldNotFound(context, field);
+                return;
+            }
+
+            var matchedField = fieldSet[refFieldIndex];
+
+            provider.BindField(context, field, currentFieldIndex, matchedField, refFieldIndex);
+        }
+
+        // Do late-bound validation on the set.
+        for (var currentFieldIndex = 0; currentFieldIndex < fieldSet.Count; currentFieldIndex++)
+        {
+            var packetField = fieldSet[currentFieldIndex];
+
+            if (packetField.PositionProvider is ILateBoundFieldReferencingProvider posRefProvider)
+            {
+                BindLateBoundField(context, fieldSet, posRefProvider, packetField, currentFieldIndex);
+            }
+
+            if (packetField.SizeProvider is ILateBoundFieldReferencingProvider sizeRefProvider)
+            {
+                BindLateBoundField(context, fieldSet, sizeRefProvider, packetField, currentFieldIndex);
+            }
+
+            if (packetField.ValueProvider is ILateBoundFieldReferencingProvider valueRefProvider)
+            {
+                BindLateBoundField(context, fieldSet, valueRefProvider, packetField, currentFieldIndex);
+            }
+        }
     }
 
     private static bool ValidateType(GeneratorExecutionContext context, GenerationOptions options, StructDeclarationSyntax owner, INamedTypeSymbol symbol)

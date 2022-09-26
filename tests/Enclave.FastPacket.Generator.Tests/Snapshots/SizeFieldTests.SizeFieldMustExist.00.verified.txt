@@ -1,0 +1,17 @@
+﻿{
+  Diagnostics: [
+    {
+      Id: FASTPACKET014,
+      Title: Specified size field was not found,
+      Severity: Error,
+      WarningLevel: 0,
+      Location: : (8,9)-(8,50),
+      Description: ,
+      HelpLink: ,
+      MessageFormat: The specified size field {0} was not found in this type. Size fields must be numeric fields in the same packet definition.,
+      Message: The specified size field DataSize was not found in this type. Size fields must be numeric fields in the same packet definition.,
+      Category: FastPacket,
+      CustomTags: []
+    }
+  ]
+}

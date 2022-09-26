@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Enclave.FastPacket.Generator.PositionProviders;
 using Enclave.FastPacket.Generator.SizeProviders;
 using Enclave.FastPacket.Generator.ValueProviders;
@@ -6,34 +7,35 @@ using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator;
 
-internal class PacketProperty : IPacketProperty
+internal class VirtualUnionField : IPacketField
 {
-    public PacketProperty(
+    public VirtualUnionField(
         string name,
-        Accessibility accessibility,
-        PacketFieldOptions options,
         IPositionProvider positionProvider,
         ISizeProvider sizeProvider,
-        IValueProvider valueProvider,
         IEnumerable<string> docComments)
     {
         Name = name;
-        Accessibility = accessibility;
         PositionProvider = positionProvider;
         SizeProvider = sizeProvider;
-        ValueProvider = valueProvider;
         DocComments = docComments;
     }
 
     public string Name { get; }
 
-    public Accessibility Accessibility { get; }
-
     public IPositionProvider PositionProvider { get; }
 
     public ISizeProvider SizeProvider { get; }
 
-    public IValueProvider ValueProvider { get; }
+    public IValueProvider ValueProvider => throw new InvalidOperationException("Unions cannot have their own value providers");
 
     public IEnumerable<string> DocComments { get; }
+
+    public Accessibility Accessibility => throw new InvalidOperationException("Cannot directly access the accessibility of a union");
+
+    public IPropertySymbol DeclaredProperty => throw new NotImplementedException();
+
+    public Location DiagnosticsLocation => throw new NotImplementedException();
+
+    public PacketFieldOptions Options => throw new NotImplementedException();
 }

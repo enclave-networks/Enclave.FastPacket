@@ -2,12 +2,12 @@
 
 internal class AutomaticPositionProvider : IPositionProvider
 {
-    public AutomaticPositionProvider(IPacketProperty? previousProperty)
+    public AutomaticPositionProvider(IPacketField? previousProperty)
     {
         PreviousProperty = previousProperty;
     }
 
-    public IPacketProperty? PreviousProperty { get; }
+    public IPacketField? PreviousProperty { get; }
 
     public virtual string GetPositionExpression(string spanName)
     {

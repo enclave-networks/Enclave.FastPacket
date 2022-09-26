@@ -8,7 +8,7 @@ public class GeneratorTest
     [Fact]
     public Task CanGenerateDefaultType()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
             using Enclave.FastPacket.Generator;
 
             namespace T
@@ -22,13 +22,13 @@ public class GeneratorTest
                 public readonly ref partial struct ValueItem
                 {   
                 }
-            }");
+            }").Verify();
     }
 
     [Fact]
     public Task CanGenerateTypeCustomToString()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
             using Enclave.FastPacket.Generator;
 
             namespace T
@@ -46,14 +46,14 @@ public class GeneratorTest
                         return $""{Value}"";
                     }
                 }
-            }");
+            }").Verify();
     }
 
 
     [Fact]
     public Task CanGenerateTypeWithPositionFunction()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -79,14 +79,14 @@ namespace T
     {   
     }
 }
-            ");
+            ").Verify();
     }
 
 
     [Fact]
     public Task CanGenerateTypeWithEnumValue()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -110,13 +110,13 @@ namespace T
     {   
     }
 }
-            ");
+            ").Verify();
     }
 
     [Fact]
     public Task CanGenerateTypeWithEnumCustomBackingTypeValue()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -140,14 +140,14 @@ namespace T
     {   
     }
 }
-            ");
+            ").Verify();
     }
 
 
     [Fact]
     public Task CanGenerateTypeWithCustomTypeSizeConstant()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -187,13 +187,13 @@ namespace T
     {   
     }
 }
-            ");
+            ").Verify();
     }
 
     [Fact]
     public Task CanGenerateTypeWithExternalSize()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -233,13 +233,13 @@ namespace T
     {   
     }
 }
-            ");
+            ").Verify();
     }
 
     [Fact]
     public Task CanGenerateTypeWithPayload()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -258,13 +258,13 @@ namespace T
     {   
     }
 }
-            ");
+            ").Verify();
     }
 
     [Fact]
     public Task CanGenerateTypeWithLongerNamespace()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -281,13 +281,13 @@ namespace Enclave.FastPacket
     {   
     }
 }
-            ");
+            ").Verify();
     }
 
     [Fact]
     public Task CanGenerateTypeWithPrivateMember()
     {
-        return CompilationVerifier.Verify(@"
+        return FluentVerify.ForSource(@"
 
 using System;
 using Enclave.FastPacket.Generator;
@@ -306,7 +306,7 @@ namespace T
     {   
     }
 }
-            ");
+            ").Verify();
     }
 
 }

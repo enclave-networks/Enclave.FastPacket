@@ -15,4 +15,6 @@ public class PacketFieldOptions
     public ulong? Bitmask { get; set; }
 
     public string? SizeFunction { get; set; }
+
+    public string? SizeField { get; set; }
 }

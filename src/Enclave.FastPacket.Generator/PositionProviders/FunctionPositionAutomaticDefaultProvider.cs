@@ -4,7 +4,7 @@ namespace Enclave.FastPacket.Generator.PositionProviders;
 
 internal class FunctionPositionAutomaticDefaultProvider : AutomaticPositionProvider
 {
-    public FunctionPositionAutomaticDefaultProvider(IMethodSymbol positionMethod, IPacketProperty? previousProperty)
+    public FunctionPositionAutomaticDefaultProvider(IMethodSymbol positionMethod, IPacketField? previousProperty)
         : base(previousProperty)
     {
         Method = positionMethod;

@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
 using Enclave.FastPacket.Generator.PositionProviders;
 using Enclave.FastPacket.Generator.SizeProviders;
 using Enclave.FastPacket.Generator.ValueProviders;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.FlowAnalysis;
 
 namespace Enclave.FastPacket.Generator;
 
-internal class PacketPropertyFactory
+internal class PacketFieldFactory
 {
     private readonly GeneratorExecutionContext _ctxt;
 
@@ -23,7 +18,7 @@ internal class PacketPropertyFactory
     private readonly Dictionary<INamedTypeSymbol, CustomProviderResult> _customProviderCache;
     private readonly IValueProvider _remainingSpanValueProvider;
 
-    public PacketPropertyFactory(GeneratorExecutionContext ctxt)
+    public PacketFieldFactory(GeneratorExecutionContext ctxt)
     {
         _ctxt = ctxt;
         _customProviderCache = new Dictionary<INamedTypeSymbol, CustomProviderResult>(SymbolEqualityComparer.Default);
@@ -75,7 +70,7 @@ internal class PacketPropertyFactory
 
     public INamedTypeSymbol SpanByteType { get; }
 
-    public bool TryCreateUnion(INamedTypeSymbol definitionType, INamedTypeSymbol unionType, IPacketProperty? previousProperty, out IPacketProperty? virtualUnionProperty)
+    public bool TryCreateUnion(INamedTypeSymbol definitionType, INamedTypeSymbol unionType, IPacketField? previousProperty, out IPacketField? virtualUnionProperty)
     {
         Location defLocation = unionType.Locations.First();
         Location configurationLocation = defLocation;
@@ -94,18 +89,20 @@ internal class PacketPropertyFactory
 
         IEnumerable<string> docComments = GetDocComments(unionType);
 
-        virtualUnionProperty = new VirtualUnionProperty(unionType.Name, positionProvider, sizeProvider, docComments);
+        virtualUnionProperty = new VirtualUnionField(unionType.Name, positionProvider, sizeProvider, docComments);
         return true;
     }
 
-    public bool TryCreate(INamedTypeSymbol definitionType, IPropertySymbol propSymbol, IPacketProperty? previousProperty, bool isLast, out IPacketProperty? packetProperty)
+    public bool TryCreate(INamedTypeSymbol definitionType, IPropertySymbol propSymbol, IPacketField? previousField, bool isLast, out IPacketField? packetField)
     {
         Location propLocation = propSymbol.Locations.First();
         Location configurationLocation = propLocation;
 
         var options = GetPacketFieldOptions(propSymbol, ref configurationLocation);
 
-        var (positionProvider, sizeProvider) = GetDefaultSizeAndPositionProvider(definitionType, previousProperty, configurationLocation, options);
+        ValidateOptions(options, configurationLocation);
+
+        var (positionProvider, sizeProvider) = GetDefaultSizeAndPositionProvider(definitionType, previousField, configurationLocation, options);
 
         IValueProvider? valueProvider = null;
 
@@ -143,6 +140,11 @@ internal class PacketPropertyFactory
                 {
                     // Diagnostic?
                 }
+            }
+            else if (SymbolEqualityComparer.Default.Equals(propType, GetSpecialType(SpecialType.System_Boolean)))
+            {
+                // If we haven't got a bitmask set, use a single byte for bool fields.
+                readType = GetSpecialType(SpecialType.System_Byte);
             }
 
             // Basic provider.
@@ -199,7 +201,7 @@ internal class PacketPropertyFactory
                 }
                 else
                 {
-                    _ctxt.ReportDiagnostic(Diagnostic.Create(Diagnostics.EnumUnderlyingTypeInvalid, propSymbol.Locations.First(), propType.Name, readType.Name));
+                    _ctxt.ReportDiagnostic(Diagnostic.Create(Diagnostics.EnumUnderlyingTypeInvalid, propLocation, propType.Name, readType.Name));
                 }
             }
             else if (propType.Equals(ReadOnlySpanByteType, SymbolEqualityComparer.Default) ||
@@ -214,7 +216,7 @@ internal class PacketPropertyFactory
                     }
                     else
                     {
-                        _ctxt.ReportDiagnostic(Diagnostic.Create(Diagnostics.SpanInMiddleOfPacketMustHaveSize, propSymbol.Locations.First(), propType.Name));
+                        _ctxt.ReportDiagnostic(Diagnostic.Create(Diagnostics.SpanInMiddleOfPacketMustHaveSize, configurationLocation, propType.Name));
                     }
                 }
                 else
@@ -234,7 +236,7 @@ internal class PacketPropertyFactory
                     }
                     else
                     {
-                        _ctxt.ReportDiagnostic(Diagnostic.Create(Diagnostics.CustomFieldTypeMustProvideLength, propSymbol.Locations.First(), propType.Name));
+                        _ctxt.ReportDiagnostic(Diagnostic.Create(Diagnostics.CustomFieldTypeMustProvideLength, configurationLocation, propType.Name));
                     }
                 }
                 else
@@ -249,15 +251,48 @@ internal class PacketPropertyFactory
 
         if (positionProvider is not null && valueProvider is not null && sizeProvider is not null)
         {
-            packetProperty = new PacketProperty(propSymbol.Name, propSymbol.DeclaredAccessibility, options, positionProvider, sizeProvider, valueProvider, docComments);
+            packetField = new PacketField(
+                propSymbol.Name,
+                propSymbol.DeclaredAccessibility,
+                configurationLocation,
+                options,
+                positionProvider,
+                sizeProvider,
+                valueProvider,
+                docComments);
             return true;
         }
 
-        packetProperty = null;
+        packetField = null;
         return false;
     }
 
-    private (IPositionProvider Position, ISizeProvider? Size) GetDefaultSizeAndPositionProvider(INamedTypeSymbol definitionType, IPacketProperty? previousProperty, Location configurationLocation, PacketFieldOptions options)
+    private void ValidateOptions(PacketFieldOptions options, Location diagnosticsLocation)
+    {
+        int setSizeProperties = 0;
+
+        if (options.SizeFunction is not null)
+        {
+            setSizeProperties++;
+        }
+
+        if (options.SizeField is not null)
+        {
+            setSizeProperties++;
+        }
+
+        if (options.Size is not null)
+        {
+            setSizeProperties++;
+        }
+
+        if (setSizeProperties > 1)
+        {
+            _ctxt.ReportDiagnostic(Diagnostic.Create(Diagnostics.DuplicateSizeOptionsProvided, diagnosticsLocation));
+        }
+    }
+
+    private (IPositionProvider Position, ISizeProvider? Size) GetDefaultSizeAndPositionProvider(INamedTypeSymbol definitionType, IPacketField? previousProperty, Location configurationLocation, PacketFieldOptions options)
     {
         IPositionProvider? positionProvider = null;
         ISizeProvider? sizeProvider = null;
@@ -287,6 +322,10 @@ internal class PacketPropertyFactory
         if (options.SizeFunction is string && TryGetSizeMethodProvider(definitionType, options.SizeFunction, configurationLocation, out var funcSizeProvider))
         {
             sizeProvider = funcSizeProvider;
+        }
+        else if (options.SizeField is string)
+        {
+            sizeProvider = new FieldSizeProvider(options.SizeField);
         }
         else if (options.Size.HasValue)
         {
@@ -371,6 +410,9 @@ internal class PacketPropertyFactory
                         break;
                     case nameof(PacketFieldAttribute.SizeFunction):
                         options.SizeFunction = argValue.Value as string;
+                        break;
+                    case nameof(PacketFieldAttribute.SizeField):
+                        options.SizeField = argValue.Value as string;
                         break;
                 }
             }

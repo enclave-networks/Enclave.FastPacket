@@ -1,0 +1,17 @@
+﻿{
+  Diagnostics: [
+    {
+      Id: FASTPACKET016,
+      Title: Specified size field exists after this field,
+      Severity: Error,
+      WarningLevel: 0,
+      Location: : (8,9)-(8,50),
+      Description: ,
+      HelpLink: ,
+      MessageFormat: The specified size field {0} is read from the byte stream after the field in which it is referenced, and has a dynamic position; this is not allowed,
+      Message: The specified size field DataSize is read from the byte stream after the field in which it is referenced, and has a dynamic position; this is not allowed,
+      Category: FastPacket,
+      CustomTags: []
+    }
+  ]
+}

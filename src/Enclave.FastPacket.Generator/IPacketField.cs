@@ -6,9 +6,13 @@ using Microsoft.CodeAnalysis;
 
 namespace Enclave.FastPacket.Generator;
 
-internal interface IPacketProperty
+internal interface IPacketField
 {
     public string Name { get; }
+
+    Location DiagnosticsLocation { get; }
+
+    PacketFieldOptions Options { get; }
 
     public Accessibility Accessibility { get; }
 

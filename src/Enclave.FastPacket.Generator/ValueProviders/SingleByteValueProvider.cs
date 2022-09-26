@@ -2,7 +2,7 @@
 
 namespace Enclave.FastPacket.Generator.ValueProviders;
 
-internal class SingleByteValueProvider : IValueProvider
+internal class SingleByteValueProvider : INumericValueProvider
 {
     public SingleByteValueProvider(INamedTypeSymbol typeSymbol)
     {
