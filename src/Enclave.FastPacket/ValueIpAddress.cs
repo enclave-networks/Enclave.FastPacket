@@ -141,9 +141,18 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
     /// <inheritdoc />
     public bool Equals(ValueIpAddress other)
     {
+        if (_addrFamily != other._addrFamily)
+        {
+            return false;
+        }
+
+        if (_addrFamily == AddressFamily.InterNetwork)
+        {
+            return _addr1 == other._addr1;
+        }
+
         return _addr1 == other._addr1 &&
-               _addr2 == other._addr2 &&
-               _addrFamily == other._addrFamily;
+               _addr2 == other._addr2;
     }
 
     /// <inheritdoc />
