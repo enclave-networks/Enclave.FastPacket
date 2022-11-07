@@ -127,6 +127,11 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
         _addrFamily = addrFamily;
     }
 
+    /// <summary>
+    /// Address family of the address.
+    /// </summary>
+    public AddressFamily AddressFamily => _addrFamily;
+
     /// <inheritdoc />
     public override bool Equals(object? obj)
     {
