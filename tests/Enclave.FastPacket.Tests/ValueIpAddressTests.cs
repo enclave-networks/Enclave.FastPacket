@@ -61,4 +61,130 @@ public class ValueIpAddressTests
 
         valueIpv6.Should().NotBe(valueIpv4);
     }
+
+    [Theory]
+    [InlineData("100.1.1.1", "101.1.1.1")]
+    [InlineData("1.255.255.255", "2.0.0.0")]
+    [InlineData("1.1.1.1", "1.1.1.2")]
+    [InlineData("0.0.0.0", "0.0.0.1")]
+    public void CanCompareLessThanIpv4Address(string left, string right)
+    {
+        var ipAddress1 = IPAddress.Parse(left);
+        var ipAddress2 = IPAddress.Parse(right);
+
+        var valueIp1 = ValueIpAddress.Create(ipAddress1);
+        var valueIp2 = ValueIpAddress.Create(ipAddress2);
+        var repeat1 = ValueIpAddress.Create(ipAddress1);
+
+        (valueIp1 < valueIp2).Should().BeTrue();
+        (valueIp2 < valueIp1).Should().BeFalse();
+        (valueIp1 < repeat1).Should().BeFalse();
+
+    }
+
+    [Theory]
+    [InlineData("100.1.1.1", "101.1.1.1")]
+    [InlineData("1.255.255.255", "2.0.0.0")]
+    [InlineData("1.1.1.1", "1.1.1.2")]
+    [InlineData("0.0.0.0", "0.0.0.1")]
+    public void CanCompareLessThanOrEqualIpv4Address(string left, string right)
+    {
+        var ipAddress1 = IPAddress.Parse(left);
+        var ipAddress2 = IPAddress.Parse(right);
+
+        var valueIp1 = ValueIpAddress.Create(ipAddress1);
+        var valueIp2 = ValueIpAddress.Create(ipAddress2);
+        var repeat1 = ValueIpAddress.Create(ipAddress1);
+
+        (valueIp1 <= valueIp2).Should().BeTrue();
+        (valueIp2 <= valueIp1).Should().BeFalse();
+        (valueIp1 <= repeat1).Should().BeTrue();
+
+    }
+
+    [Theory]
+    [InlineData("101.1.1.1", "100.1.1.1")]
+    [InlineData("2.0.0.0", "1.255.255.255")]
+    [InlineData("1.1.1.2", "1.1.1.1")]
+    [InlineData("0.0.0.1", "0.0.0.0")]
+    public void CanCompareGreaterThanIpv4Address(string left, string right)
+    {
+        var ipAddress1 = IPAddress.Parse(left);
+        var ipAddress2 = IPAddress.Parse(right);
+
+        var valueIp1 = ValueIpAddress.Create(ipAddress1);
+        var valueIp2 = ValueIpAddress.Create(ipAddress2);
+        var repeat1 = ValueIpAddress.Create(ipAddress1);
+
+        (valueIp1 > valueIp2).Should().BeTrue();
+        (valueIp2 > valueIp1).Should().BeFalse();
+        (valueIp1 > repeat1).Should().BeFalse();
+
+    }
+
+    [Theory]
+    [InlineData("101.1.1.1", "100.1.1.1")]
+    [InlineData("2.0.0.0", "1.255.255.255")]
+    [InlineData("1.1.1.2", "1.1.1.1")]
+    [InlineData("0.0.0.1", "0.0.0.0")]
+    public void CanCompareGreaterThanOrEqualIpv4Address(string left, string right)
+    {
+        var ipAddress1 = IPAddress.Parse(left);
+        var ipAddress2 = IPAddress.Parse(right);
+
+        var valueIp1 = ValueIpAddress.Create(ipAddress1);
+        var valueIp2 = ValueIpAddress.Create(ipAddress2);
+        var repeat1 = ValueIpAddress.Create(ipAddress1);
+
+        (valueIp1 >= valueIp2).Should().BeTrue();
+        (valueIp2 >= valueIp1).Should().BeFalse();
+        (valueIp1 >= repeat1).Should().BeTrue();
+
+    }
+
+    [Theory]
+    [InlineData("2001:db8:3333:4444:5555:6666:7777:8889", "2001:db8:3333:4444:5555:6666:7777:8888")]
+    [InlineData("2001:db8:3333:4445:5555:6666:7777:8888", "2001:db8:3333:4444:5555:6666:7777:8888")]
+    [InlineData("2002:db8:3333:4444:5555:6666:7777:8888", "2001:db8:3333:4444:5555:6666:7777:8888")]
+    [InlineData("::1", "::")]
+    [InlineData("::18.52.86.121", "::18.52.86.120")]
+    [InlineData("2002::", "2001:db8::1234:5678")]
+    [InlineData("1::", "::1")]
+    public void CanCompareGreaterThanIpv6Address(string left, string right)
+    {
+        var ipAddress1 = IPAddress.Parse(left);
+        var ipAddress2 = IPAddress.Parse(right);
+
+        var valueIp1 = ValueIpAddress.Create(ipAddress1);
+        var valueIp2 = ValueIpAddress.Create(ipAddress2);
+        var repeat1 = ValueIpAddress.Create(ipAddress1);
+
+        (valueIp1 > valueIp2).Should().BeTrue();
+        (valueIp2 > valueIp1).Should().BeFalse();
+        (valueIp1 > repeat1).Should().BeFalse();
+
+    }
+
+    [Theory]
+    [InlineData("2001:db8:3333:4444:5555:6666:7777:8889", "2001:db8:3333:4444:5555:6666:7777:8888")]
+    [InlineData("2001:db8:3333:4445:5555:6666:7777:8888", "2001:db8:3333:4444:5555:6666:7777:8888")]
+    [InlineData("2002:db8:3333:4444:5555:6666:7777:8888", "2001:db8:3333:4444:5555:6666:7777:8888")]
+    [InlineData("::1", "::")]
+    [InlineData("::18.52.86.121", "::18.52.86.120")]
+    [InlineData("2002::", "2001:db8::1234:5678")]
+    [InlineData("1::", "::1")]
+    public void CanCompareGreaterThanOrEqualIpv6Address(string left, string right)
+    {
+        var ipAddress1 = IPAddress.Parse(left);
+        var ipAddress2 = IPAddress.Parse(right);
+
+        var valueIp1 = ValueIpAddress.Create(ipAddress1);
+        var valueIp2 = ValueIpAddress.Create(ipAddress2);
+        var repeat1 = ValueIpAddress.Create(ipAddress1);
+
+        (valueIp1 >= valueIp2).Should().BeTrue();
+        (valueIp2 >= valueIp1).Should().BeFalse();
+        (valueIp1 >= repeat1).Should().BeTrue();
+
+    }
 }
