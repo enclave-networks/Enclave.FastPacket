@@ -30,7 +30,7 @@ namespace Enclave.FastPacket.Generator
         /// to indicate the exact length of the buffer slice returned.
         /// </para>
         /// <para>
-        /// The start position of all fields following this one will be adjusted to accomodate this size.
+        /// The start position of all fields following this one will be adjusted to accommodate this size.
         /// </para>
         /// <para>
         /// If you set this on a primitive/numeric field with a return type smaller (in bytes) than the provided size,
@@ -66,7 +66,7 @@ namespace Enclave.FastPacket.Generator
         /// *before* this one.
         /// </para>
         /// <para>
-        /// The start position of all fields following this one will be adjusted to accomodate the size returned by the function.
+        /// The start position of all fields following this one will be adjusted to accommodate the size returned by the function.
         /// </para>
         /// </remarks>
         public string? SizeFunction { get; set; }
@@ -79,7 +79,7 @@ namespace Enclave.FastPacket.Generator
         /// The field in question should be a numeric field prior to this field in the byte order.
         /// </para>      
         /// <para>
-        /// The start position of all fields following this one will be adjusted to accomodate the size returned by that field.
+        /// The start position of all fields following this one will be adjusted to accommodate the size returned by that field.
         /// </para>
         /// </remarks>
         public string? SizeField { get; set; }
@@ -92,7 +92,7 @@ namespace Enclave.FastPacket.Generator
         /// In most cases you should avoid using this property; position can usually be automatically determined from the other fields in the packet.
         /// </para>
         /// <para>
-        /// The start position of all fields following this one will be adjusted to accomodate this size.
+        /// The start position of all fields following this one will be adjusted to accommodate this size.
         /// </para>
         /// </remarks>
         public int Position { get; set; }
@@ -111,7 +111,7 @@ namespace Enclave.FastPacket.Generator
         /// </code>
         /// </para>
         /// <para>
-        /// The start position of all fields following this one will be adjusted to accomodate the size returned by the function.
+        /// The start position of all fields following this one will be adjusted to accommodate the size returned by the function.
         /// </para>
         /// </remarks>
         public string? PositionFunction { get; set; }
