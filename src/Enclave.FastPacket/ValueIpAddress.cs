@@ -2,6 +2,7 @@
 using System.Buffers.Binary;
 using System.Net;
 using System.Net.Sockets;
+using System.Numerics;
 
 namespace Enclave.FastPacket;
 
@@ -214,6 +215,40 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
     public override string ToString()
     {
         return ToIpAddress().ToString();
+    }
+
+    /// <summary>
+    /// Converts an IPv4 address to a unsigned 32-bit integer.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="AddressFamily"/> is <see cref="AddressFamily.InterNetworkV6"/>.</exception>
+    public uint ToUInt()
+    {
+        if (_addrFamily == AddressFamily.InterNetwork)
+        {
+            return unchecked((uint)_addr1);
+        }
+
+        throw new InvalidOperationException("Only IPv4 addresses can be converted to a UInt32");
+    }
+
+    /// <summary>
+    /// Convert this IP address to a big-integer representation.
+    /// </summary>
+    public BigInteger ToBigInteger()
+    {
+        if (_addrFamily == AddressFamily.InterNetworkV6)
+        {
+            Span<byte> destSpan = stackalloc byte[16];
+
+            BinaryPrimitives.WriteUInt64BigEndian(destSpan, _addr2);
+            BinaryPrimitives.WriteUInt64BigEndian(destSpan.Slice(sizeof(ulong)), _addr1);
+
+            return new BigInteger(destSpan, isUnsigned: true, isBigEndian: true);
+        }
+        else
+        {
+            return new BigInteger(_addr1);
+        }
     }
 
     /// <summary>

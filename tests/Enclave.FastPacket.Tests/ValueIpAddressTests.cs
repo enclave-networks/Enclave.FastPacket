@@ -1,5 +1,7 @@
 ﻿using FluentAssertions;
+using System;
 using System.Net;
+using System.Numerics;
 using Xunit;
 
 namespace Enclave.FastPacket.Tests;
@@ -60,6 +62,31 @@ public class ValueIpAddressTests
         var valueIpv4 = ValueIpAddress.Create(emptyIpv4);
 
         valueIpv6.Should().NotBe(valueIpv4);
+    }
+
+    [Theory]
+    [InlineData("81.152.41.187", 1368926651u)]
+    [InlineData("100.154.122.4", 1687845380u)]
+    [InlineData("4.122.154.100", 75143780u)]
+    public void CanConvertToUInt(string ip, uint expected)
+    {
+        Assert.Equal(expected, ValueIpAddress.Create(IPAddress.Parse(ip)).ToUInt());
+    }
+
+    [Fact]
+    public void CannotConvertIpv6ToUInt()
+    {
+        Assert.Throws<InvalidOperationException>(() => ValueIpAddress.Create(IPAddress.Parse("2001:db8:3333:4444:5555:6666:7777:8889")).ToUInt());
+    }
+
+    [Fact]
+    public void CanConvertToBigInt()
+    {
+        var ip = ValueIpAddress.Create(IPAddress.Parse("2001:db8:3333:4444:5555:6666:7777:8889"));
+
+        var expected = BigInteger.Parse("42540766427128305956041295149173016713");
+
+        Assert.Equal(expected, ip.ToBigInteger());
     }
 
     [Theory]
