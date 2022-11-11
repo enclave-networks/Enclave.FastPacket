@@ -73,6 +73,16 @@ public class ValueIpAddressTests
         Assert.Equal(expected, ValueIpAddress.Create(IPAddress.Parse(ip)).ToUInt());
     }
 
+    [Theory]
+    [InlineData("81.152.41.187", 1368926651u)]
+    [InlineData("100.154.122.4", 1687845380u)]
+    [InlineData("4.122.154.100", 75143780u)]
+    public void CanConvertIpV4ToBigInt(string ip, uint expected)
+    {
+        Assert.Equal(new BigInteger(expected), ValueIpAddress.Create(IPAddress.Parse(ip)).ToBigInteger());
+    }
+
+
     [Fact]
     public void CannotConvertIpv6ToUInt()
     {
