@@ -2,7 +2,6 @@
 using System.Buffers.Binary;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.ConstrainedExecution;
 
 namespace Enclave.FastPacket;
 
@@ -11,8 +10,8 @@ namespace Enclave.FastPacket;
 /// </summary>
 public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
 {
-    private readonly long _addr1;
-    private readonly long _addr2;
+    private readonly ulong _addr1;
+    private readonly ulong _addr2;
     private readonly AddressFamily _addrFamily;
 
     /// <summary>
@@ -50,7 +49,7 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
     /// </summary>
     public static ValueIpAddress CreateIpv4(ReadOnlySpan<byte> address)
     {
-        if (BinaryPrimitives.TryReadInt32BigEndian(address, out var uintAddr))
+        if (BinaryPrimitives.TryReadUInt32BigEndian(address, out var uintAddr))
         {
             return new ValueIpAddress(AddressFamily.InterNetwork, uintAddr, 0);
         }
@@ -65,8 +64,8 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
     /// </summary>
     public static ValueIpAddress CreateIpv6(ReadOnlySpan<byte> address)
     {
-        if (BinaryPrimitives.TryReadInt64BigEndian(address, out var addr1) &&
-            BinaryPrimitives.TryReadInt64BigEndian(address.Slice(sizeof(long)), out var addr2))
+        if (BinaryPrimitives.TryReadUInt64BigEndian(address, out var addr2) &&
+            BinaryPrimitives.TryReadUInt64BigEndian(address.Slice(sizeof(ulong)), out var addr1))
         {
             return new ValueIpAddress(AddressFamily.InterNetworkV6, addr1, addr2);
         }
@@ -107,20 +106,20 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
     {
         if (data.Length > 4)
         {
-            BinaryPrimitives.TryReadInt64BigEndian(data, out _addr1);
-            BinaryPrimitives.TryReadInt64BigEndian(data.Slice(sizeof(long)), out _addr2);
+            BinaryPrimitives.TryReadUInt64BigEndian(data, out _addr2);
+            BinaryPrimitives.TryReadUInt64BigEndian(data.Slice(sizeof(ulong)), out _addr1);
             _addrFamily = AddressFamily.InterNetworkV6;
         }
         else
         {
-            BinaryPrimitives.TryReadInt32BigEndian(data, out var uintAddr);
+            BinaryPrimitives.TryReadUInt32BigEndian(data, out var uintAddr);
             _addr1 = uintAddr;
             _addr2 = 0;
             _addrFamily = AddressFamily.InterNetwork;
         }
     }
 
-    private ValueIpAddress(AddressFamily addrFamily, long addr1, long addr2)
+    private ValueIpAddress(AddressFamily addrFamily, ulong addr1, ulong addr2)
     {
         _addr1 = addr1;
         _addr2 = addr2;
@@ -170,8 +169,8 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
         {
             Span<byte> destSpan = stackalloc byte[16];
 
-            BinaryPrimitives.WriteInt64BigEndian(destSpan, _addr1);
-            BinaryPrimitives.WriteInt64BigEndian(destSpan.Slice(sizeof(long)), _addr2);
+            BinaryPrimitives.WriteUInt64BigEndian(destSpan, _addr2);
+            BinaryPrimitives.WriteUInt64BigEndian(destSpan.Slice(sizeof(ulong)), _addr1);
 
             return new IPAddress(destSpan);
         }
@@ -179,7 +178,7 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
         {
             Span<byte> destSpan = stackalloc byte[4];
 
-            BinaryPrimitives.WriteInt32BigEndian(destSpan, (int)_addr1);
+            BinaryPrimitives.WriteUInt32BigEndian(destSpan, (uint)_addr1);
 
             return new IPAddress(destSpan);
         }
@@ -197,8 +196,8 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
                 throw new FastPacketException("Destination too small for ipv6", destination);
             }
 
-            BinaryPrimitives.WriteInt64BigEndian(destination, _addr1);
-            BinaryPrimitives.WriteInt64BigEndian(destination.Slice(sizeof(long)), _addr2);
+            BinaryPrimitives.WriteUInt64BigEndian(destination, _addr2);
+            BinaryPrimitives.WriteUInt64BigEndian(destination.Slice(sizeof(ulong)), _addr1);
         }
         else
         {
@@ -207,7 +206,7 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
                 throw new FastPacketException("Destination too small for ipv4", destination);
             }
 
-            BinaryPrimitives.WriteInt32BigEndian(destination, (int)_addr1);
+            BinaryPrimitives.WriteUInt32BigEndian(destination, (uint)_addr1);
         }
     }
 
@@ -231,5 +230,81 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
     public static bool operator !=(ValueIpAddress left, ValueIpAddress right)
     {
         return !(left == right);
+    }
+
+    /// <summary>
+    /// Greater than operator.
+    /// </summary>
+    public static bool operator >(ValueIpAddress left, ValueIpAddress right)
+    {
+        if (left._addrFamily != right._addrFamily)
+        {
+            throw new InvalidOperationException("Comparison requires both addresses to be of the same address family.");
+        }
+
+        if (left._addrFamily == AddressFamily.InterNetwork)
+        {
+            return left._addr1 > right._addr1;
+        }
+
+        return left._addr2 > right._addr2 ||
+               (left._addr2 == right._addr2 && left._addr1 > right._addr1);
+    }
+
+    /// <summary>
+    /// Greater than or equal operator.
+    /// </summary>
+    public static bool operator >=(ValueIpAddress left, ValueIpAddress right)
+    {
+        if (left._addrFamily != right._addrFamily)
+        {
+            throw new InvalidOperationException("Comparison requires both addresses to be of the same address family.");
+        }
+
+        if (left._addrFamily == AddressFamily.InterNetwork)
+        {
+            return left._addr1 >= right._addr1;
+        }
+
+        return left._addr2 > right._addr2 ||
+               (left._addr2 == right._addr2 && left._addr1 >= right._addr1);
+    }
+
+    /// <summary>
+    /// Less than operator.
+    /// </summary>
+    public static bool operator <(ValueIpAddress left, ValueIpAddress right)
+    {
+        if (left._addrFamily != right._addrFamily)
+        {
+            throw new InvalidOperationException("Comparison requires both addresses to be of the same address family.");
+        }
+
+        if (left._addrFamily == AddressFamily.InterNetwork)
+        {
+            return left._addr1 < right._addr1;
+        }
+
+        return left._addr2 < right._addr2 ||
+               (left._addr2 == right._addr2 && left._addr1 < right._addr1);
+    }
+
+    /// <summary>
+    /// Less than or equal operator.
+    /// </summary>
+    public static bool operator <=(ValueIpAddress left, ValueIpAddress right)
+    {
+        if (left._addrFamily != right._addrFamily)
+        {
+            throw new InvalidOperationException("Comparison requires both addresses to be of the same address family.");
+        }
+
+        if (left._addrFamily == AddressFamily.InterNetwork)
+        {
+            return left._addr1 <= right._addr1;
+        }
+
+        return left._addr2 < right._addr2 ||
+               (left._addr2 == right._addr2 && left._addr1 <= right._addr1);
     }
 }
