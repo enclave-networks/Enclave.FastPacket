@@ -240,10 +240,10 @@ public readonly struct ValueIpAddress : IEquatable<ValueIpAddress>
         {
             Span<byte> destSpan = stackalloc byte[16];
 
-            BinaryPrimitives.WriteUInt64BigEndian(destSpan, _addr2);
-            BinaryPrimitives.WriteUInt64BigEndian(destSpan.Slice(sizeof(ulong)), _addr1);
+            BinaryPrimitives.WriteUInt64LittleEndian(destSpan, _addr1);
+            BinaryPrimitives.WriteUInt64LittleEndian(destSpan.Slice(sizeof(ulong)), _addr2);
 
-            return new BigInteger(destSpan, isUnsigned: true, isBigEndian: true);
+            return new BigInteger(destSpan, isUnsigned: true, isBigEndian: false);
         }
         else
         {
