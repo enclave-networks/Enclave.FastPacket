@@ -16,7 +16,7 @@ public class Ipv4Tests
         var destIp = IPAddress.Parse("127.0.0.2");
 
         var packet = new PacketDotNet.IPv4Packet(sourceIp, destIp);
-        packet.FragmentFlags = (byte)FragmentFlags.MoreFragments;
+        packet.FragmentFlags = (ushort)FragmentFlags.MoreFragments;
         packet.FragmentOffset = 56;
         packet.Id = 10;
         packet.HopLimit = 15;
@@ -110,5 +110,37 @@ public class Ipv4Tests
 
         // 3 is the code for port unreachable.
         icmp.Code.Should().Be(3);
+    }
+
+    [Theory]
+    [InlineData(IpProtocol.Udp, FragmentFlags.DontFragment)]
+    [InlineData(IpProtocol.Icmp, FragmentFlags.MoreFragments)]
+    [InlineData(IpProtocol.Icmp, FragmentFlags.Reserved)]
+    [InlineData(IpProtocol.Tcp, FragmentFlags.None)]
+    public void CanReadIpv4FragmentedPacket(IpProtocol protocol, FragmentFlags fragmentFlags)
+    {
+        var random = new Random();
+        var fragmentOffset = (ushort)random.Next(0, 8191); // (13 bits available for offset)
+        var sourceIp = IPAddress.Parse("10.0.0.1");
+        var destIp = IPAddress.Parse("127.0.0.2");
+
+        var packet = new IPv4Packet(sourceIp, destIp)
+        {
+            Id = (ushort)random.Next(0, ushort.MaxValue),
+            Protocol = (ProtocolType)protocol,
+            FragmentFlags = (ushort)fragmentFlags,
+            FragmentOffset = fragmentOffset
+        };
+
+        var packetData = packet.Bytes;
+
+        // Parse the packet
+        var myIp = new ReadOnlyIpv4PacketSpan(packetData);
+
+        myIp.Protocol.Should().Be(protocol);
+        myIp.Source.ToIpAddress().Should().Be(sourceIp);
+        myIp.Destination.ToIpAddress().Should().Be(destIp);
+        myIp.FragmentFlags.Should().Be(fragmentFlags);
+        myIp.FragmentOffset.Should().Be(fragmentOffset);
     }
 }
