@@ -2,6 +2,7 @@ using FluentAssertions;
 using PacketDotNet;
 using PacketDotNet.Utils;
 using System;
+using System.Linq;
 using System.Net;
 using Xunit;
 
@@ -16,7 +17,7 @@ public class Ipv4Tests
         var destIp = IPAddress.Parse("127.0.0.2");
 
         var packet = new PacketDotNet.IPv4Packet(sourceIp, destIp);
-        packet.FragmentFlags = (byte)FragmentFlags.MoreFragments;
+        packet.FragmentFlags = (ushort)FragmentFlags.MoreFragments;
         packet.FragmentOffset = 56;
         packet.Id = 10;
         packet.HopLimit = 15;
@@ -110,5 +111,79 @@ public class Ipv4Tests
 
         // 3 is the code for port unreachable.
         icmp.Code.Should().Be(3);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="standardMtu">Assumed Internet MTU</param>
+    /// <param name="workingMtu">MTU of the encapsualting adapter that causing fragmentation</param>
+    [Theory]
+    [InlineData(1500, 1472, 1500)] // Standard MTU, No Encapsulation, No Fragmentation
+    [InlineData(1500, 1472, 1400)] // Adjusted MTU closer to Standard MTU
+    [InlineData(1500, 1472, 1280)] // Standard MTU, Encapsulating MTU
+    [InlineData(1500, 1472, 576)]  // Encapsulation with low MTU
+    [InlineData(9000, 1472, 576)]  // Encapsulation with low MTU
+    public void CanReadIpv4FragmentedPacketWithIcmpPayload(int standardMtu, int icmpPayloadLength, int workingMtu)
+    {
+        const int ipHeaderSize = 20; // IPv4 header size
+        const int icmpHeaderSize = 8; // ICMP header size
+        const int ipIdentity = 0x1234;
+
+        int icmpPacketPayloadMaxSize = (workingMtu - ipHeaderSize - icmpHeaderSize) % 8; // Ensure fragment size is a multiple of 8
+
+        var sourceIp = IPAddress.Parse("10.0.0.1");
+        var destIp = IPAddress.Parse("127.0.0.2");
+
+        // Build ICMP message
+        var icmpPayload = Enumerable.Range(0, icmpPayloadLength).Select(i => (byte)"ABCD"[i % 4]).ToArray();
+
+        var icmpMessage = new IcmpV4Packet(new ByteArraySegment(icmpPayload.Take(icmpPacketPayloadMaxSize).ToArray()));
+        icmpMessage.TypeCode = IcmpV4TypeCode.EchoReply;
+
+        // Build first IPv4 packet fragment
+        var firstFragment = new IPv4Packet(sourceIp, destIp)
+        {
+            PayloadPacket = icmpMessage,
+            Protocol = ProtocolType.Icmp,
+            Id = ipIdentity,
+            FragmentFlags = (ushort)FragmentFlags.MoreFragments,
+            FragmentOffset = 0
+        };
+
+        // Build second IPv4 packet fragment
+        var secondFragment = new IPv4Packet(sourceIp, destIp)
+        {
+            PayloadData = icmpPayload.Skip(icmpPacketPayloadMaxSize).Take(icmpPayload.Length - icmpPacketPayloadMaxSize).ToArray(),
+            Protocol = ProtocolType.Icmp,
+            Id = ipIdentity,
+            FragmentFlags = 0,
+            FragmentOffset = icmpPacketPayloadMaxSize / 8 // Offset in 8-byte units
+        };
+
+        // Check first packet fragment
+        var myIp1 = new Ipv4PacketSpan(firstFragment.Bytes);
+
+        myIp1.Protocol.Should().Be(IpProtocol.Icmp);
+        myIp1.Source.ToIpAddress().Should().Be(sourceIp);
+        myIp1.Destination.ToIpAddress().Should().Be(destIp);
+        myIp1.FragmentFlags.Should().Be(FragmentFlags.MoreFragments);
+        myIp1.FragmentOffset.Should().Be(0);
+        
+        var icmp1 = new Icmpv4PacketSpan(myIp1.Payload);
+
+        icmp1.Type.Should().Be(Icmpv4Types.EchoReply);
+        icmp1.Code.Should().Be(0); // 0 is the code for EchoReply.
+        icmp1.Data.Length.Should().Be(icmpPacketPayloadMaxSize - 8);
+
+        // Check second packet fragment
+        var myIp2 = new Ipv4PacketSpan(secondFragment.Bytes);
+
+        myIp2.Protocol.Should().Be(IpProtocol.Icmp);
+        myIp2.Source.ToIpAddress().Should().Be(sourceIp);
+        myIp2.Destination.ToIpAddress().Should().Be(destIp);
+        myIp2.FragmentFlags.Should().Be(FragmentFlags.None);
+        myIp2.FragmentOffset.Should().Be((ushort)(icmpPacketPayloadMaxSize / 8));
+        myIp2.Payload.Length.Should().Be(icmpPayloadLength - icmpPacketPayloadMaxSize); // Remaining payload size (without ICMP header).
     }
 }
