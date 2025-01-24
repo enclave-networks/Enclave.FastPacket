@@ -12,19 +12,24 @@ namespace Enclave.FastPacket;
 public enum FragmentFlags
 {
     /// <summary>
-    /// Reserved, do not use.
+    /// None
     /// </summary>
-    Reserved = 0x01,
+    None = 0, // When bit shifted, gives [000][0 0000 0000 0000] in binary
+
+    /// <summary>
+    /// More fragments (MF).
+    /// </summary>
+    MoreFragments = 1, // When bit shifted, gives [001][0 0000 0000 0000] in binary
 
     /// <summary>
     /// Don't fragment (DF).
     /// </summary>
-    DontFragment = 0x02,
+    DontFragment = 2, // When bit shifted, gives [010][0 0000 0000 0000] in binary
 
     /// <summary>
-    /// More framgents (MF).
+    /// Reserved, do not use.
     /// </summary>
-    MoreFragments = 0x04,
+    Reserved = 4, // When bit shifted, gives [100][0 0000 0000 0000] in binary
 }
 
 internal ref struct Ipv4Definition
